@@ -32,10 +32,15 @@ public class ValueCell : ListCell
         HideButtons();
     }
 
-    public override void SelectCell(Player transform)
+    public override void SelectCell()
     {
-        base.SelectCell(transform);
+        base.SelectCell();
         listManager.EnableButtonsInList(this);
+    }
+
+    public override void Interact()
+    {
+        SelectCell();
     }
 
     public void IncreaseValues()

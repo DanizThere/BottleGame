@@ -1,11 +1,15 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour, IService, IDispose
 {
     private EventBus bus;
     private SeedGenerator generator;
     private SaveManager saveManager;
+    public GameState GameState { get; private set; } = GameState.On_UI;
+    public TurnManager turnManager {  get; private set; }
+    [SerializeField] private MusicMan musicManager;
     public Player player { get; private set; }
    
     public int pointsInGame;
@@ -14,34 +18,40 @@ public class GameManager : MonoBehaviour, IService, IDispose
     public void Init(EventBus eventBus, Player player, SaveManager save)
     {
         generator = new SeedGenerator();
+        turnManager = new TurnManager();
         generator.Generate();
 
         bus = eventBus;
-        bus.Subscribe<TakeEffectSignal>(SetTurn);
-        bus.Subscribe<WhenDeadSignal>(CheckSavethrows);
-        bus.Subscribe<WhenDeadSignal>(SetAlive);
-        bus.Subscribe<UnsubscibeSignal>(Dispose);
-
-        bus.Invoke(new StartUseSignal());
-        bus.Invoke(new StartPlaySignal());
 
         this.player = player;
         saveManager = save;
+
+        turnManager.Init(bus);
+        musicManager.Init(this.player.transform);  
     }
 
-    public void SetTurn(TakeEffectSignal signal)
+    private void Start()
     {
-        switch (signal.Person)
+        bus.Subscribe<IntermediateSignal>(SetTurn);
+        bus.Subscribe<WhenDeadSignal>(CheckSavethrows);
+        bus.Subscribe<WhenDeadSignal>(SetAlive);
+        bus.Subscribe<DeathSignal>(x => SetGameState(GameState.On_UI));
+        bus.Subscribe<UnsubscibeSignal>(Dispose);
+    }
+
+    public void SetTurn(IntermediateSignal signal)
+    {
+        switch (turnManager.ShowLastTurn())
         {
-            case TypeOfPerson.PLAYER:
+            case (int)TypeOfPerson.PLAYER:
                 bus.Invoke(new EnemyTurnSignal());
                 bus.Invoke(new StopUseSignal());
                 break;
-            case TypeOfPerson.ENEMY:
+            case (int)TypeOfPerson.ENEMY:
                 bus.Invoke(new PlayerTurnSignal());
                 bus.Invoke(new StartUseSignal());
                 break;
-            case TypeOfPerson.NONE:
+            case (int)TypeOfPerson.NONE:
                 Debug.Log("Todo");
                 break;
         }
@@ -84,6 +94,32 @@ public class GameManager : MonoBehaviour, IService, IDispose
         }
     }
 
+    public void SetGameState(GameState gameState)
+    {
+        GameState = gameState;
+
+        switch (GameState)
+        {
+            case GameState.On_UI:
+                bus.Invoke(new OnUISignal());
+                bus.Invoke(new StopPlaySignal());
+                bus.Invoke(new StopUseSignal());
+                break;
+            case GameState.On_Game:
+                bus.Invoke(new OffUISignal());
+                bus.Invoke(new StartPlaySignal());
+                bus.Invoke(new StartUseSignal());
+                break;
+            case GameState.On_Pause:
+                bus.Invoke(new OnUISignal());
+                bus.Invoke(new StopPlaySignal());
+                bus.Invoke(new StopUseSignal());
+                break;
+        }
+
+        Debug.Log("Im tired boss " + GameState.ToString());
+    }
+
     public int LevelPoints()
     {
         int result = (int)Math.Log(pointsInGame);
@@ -95,8 +131,20 @@ public class GameManager : MonoBehaviour, IService, IDispose
         Application.Quit();
     }
 
+    public void LoadLevel(int level)
+    {
+        SceneManager.LoadScene(level);
+    }
+
     public void Dispose(UnsubscibeSignal signal)
     {
-        bus.Unsubscribe<TakeEffectSignal>(SetTurn);
+        bus.Unsubscribe<IntermediateSignal>(SetTurn);
     }
+}
+
+public enum GameState
+{
+    On_UI,
+    On_Game,
+    On_Pause
 }

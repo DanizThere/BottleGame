@@ -18,6 +18,6 @@ public class CameraHandle : MonoBehaviour
 
     public async void HandleRotate(Transform handle, float time)
     {
-        transform.rotation = Quaternion.Lerp(transform.rotation, handle.rotation, time);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, handle.rotation, time);
     }
 }

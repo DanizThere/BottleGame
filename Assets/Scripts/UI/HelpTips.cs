@@ -38,7 +38,7 @@ public class HelpTips : MonoBehaviour
             {
                 tip.SetActive(true);
                 Vector3 p = cam.MouseOnViewScreen();
-                tipScr.Move(hit.point);
+                tipScr.Move(hit.point, hit.collider.gameObject.transform.rotation);
                 info.text = cell.Description;
                 nameOfInteract.text = cell.NameOfInteract;
             }

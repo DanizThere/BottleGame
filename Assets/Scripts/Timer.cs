@@ -8,6 +8,7 @@ public class Timer : MonoBehaviour, IDispose
 {
     public float deltaTimer = 15;
     public float timer { get; private set; }
+    private bool canCount;
     private EventBus eventBus;
     private CancellationTokenSource token;
     private SoundManager soundManager;
@@ -23,11 +24,13 @@ public class Timer : MonoBehaviour, IDispose
         eventBus = ServiceLocator.Instance.Get<EventBus>();
         soundManager = ServiceLocator.Instance.Get<SoundManager>();
 
-        eventBus.Subscribe<TakeEffectSignal>(CancelTimer<TakeEffectSignal>, 3);
-        eventBus.Subscribe<DeathSignal>(CancelTimer<DeathSignal>,0);
-        eventBus.Subscribe<TakeEffectSignal>(ResetToken, 2);
-        eventBus.Subscribe<TakeEffectSignal>(TurnTimer, 1);
+        eventBus.Subscribe<IntermediateSignal>(CancelTimer<IntermediateSignal>, 3);
+        eventBus.Subscribe<DeathSignal>(StopTimer,0);
+        eventBus.Subscribe<IntermediateSignal>(ResetToken, 2);
+        eventBus.Subscribe<IntermediateSignal>(TurnTimer, 1);
         eventBus.Subscribe<UnsubscibeSignal>(Dispose);
+
+        canCount = true;
     }
 
     public void ResetTimer()
@@ -35,7 +38,7 @@ public class Timer : MonoBehaviour, IDispose
         timer = deltaTimer;
     }
 
-    public void ResetToken(TakeEffectSignal signal)
+    public void ResetToken(IntermediateSignal signal)
     {
         token.Dispose();
         token = new CancellationTokenSource();
@@ -46,7 +49,7 @@ public class Timer : MonoBehaviour, IDispose
         deltaTimer = time;
     }
 
-    public void TurnTimer(TakeEffectSignal signal)
+    public void TurnTimer(IntermediateSignal signal)
     {
         ResetTimer();
         WorkTimer(signal, token.Token);
@@ -54,8 +57,9 @@ public class Timer : MonoBehaviour, IDispose
 
 
     //todo: переписать таймер, чтобы он начинался исключительно в момент наступления хода
-    private async Task WorkTimer(TakeEffectSignal signal, CancellationToken token)
+    private async Task WorkTimer(IntermediateSignal signal, CancellationToken token)
     {
+        if (!canCount) return;
         do
         {
             if (token.IsCancellationRequested)
@@ -73,17 +77,17 @@ public class Timer : MonoBehaviour, IDispose
             return;
         }
 
-        switch (signal.Person)
-        {
-            case TypeOfPerson.PLAYER:
-                eventBus.Invoke(new PlayerTurnSignal());
-                eventBus.Invoke(new StartUseSignal());
-                break;
-            case TypeOfPerson.ENEMY:
-                eventBus.Invoke(new EnemyTurnSignal());
-                eventBus.Invoke(new StopUseSignal());
-                break;
-        }
+        //switch (signal.Person)
+        //{
+        //    case TypeOfPerson.PLAYER:
+        //        eventBus.Invoke(new PlayerTurnSignal());
+        //        eventBus.Invoke(new StartUseSignal());
+        //        break;
+        //    case TypeOfPerson.ENEMY:
+        //        eventBus.Invoke(new EnemyTurnSignal());
+        //        eventBus.Invoke(new StopUseSignal());
+        //        break;
+        //}
     }
 
     private void CancelTimer<T>(T signal) where T : ISignal
@@ -91,12 +95,16 @@ public class Timer : MonoBehaviour, IDispose
         token.Cancel();
     }
 
+    private void StopTimer(DeathSignal signal) { 
+        token.Cancel();
+        canCount = false; }
+
     public void Dispose(UnsubscibeSignal signal)
     {
         token.Cancel();
 
-        eventBus.Unsubscribe<TakeEffectSignal>(TurnTimer);
-        eventBus.Unsubscribe<TakeEffectSignal>(ResetToken);
-        eventBus.Unsubscribe<TakeEffectSignal>(CancelTimer<TakeEffectSignal>);
+        eventBus.Unsubscribe<IntermediateSignal>(TurnTimer);
+        eventBus.Unsubscribe<IntermediateSignal>(ResetToken);
+        eventBus.Unsubscribe<IntermediateSignal>(CancelTimer<IntermediateSignal>);
     }
 }

@@ -5,7 +5,7 @@ public class InputManager : MonoBehaviour, IDispose
 {
     private InputSystem_Actions action;
     public Vector2 CameraInput;
-    private IAction act;
+    private IPlayerInput act;
     private EventBus eventBus;
     private void Awake()
     {
@@ -16,12 +16,9 @@ public class InputManager : MonoBehaviour, IDispose
 
     private void Start()
     {
-        act = FindAnyObjectByType<Player>().mainAction;
+        act = FindAnyObjectByType<Player>().GetComponent<IPlayerInput>();
         eventBus = ServiceLocator.Instance.Get<EventBus>();
-
-        eventBus.Subscribe<ChangeActionSignal>(SetAction<ChangeActionSignal>, 2);
         eventBus.Subscribe<UnsubscibeSignal>(Dispose);
-        Debug.Log(act.ToString());
     }
 
     private void OnEnable()
@@ -29,6 +26,7 @@ public class InputManager : MonoBehaviour, IDispose
         action.Enable();
 
         action.Player.Look.canceled += i => CameraInput = Vector2.zero;
+        action.UI.Cancel.performed += CancelPerformed;
 
         action.Player.Look.performed += i => CameraInput = i.ReadValue<Vector2>();
         action.Player.Attack.performed += InteractPerformed;
@@ -39,12 +37,13 @@ public class InputManager : MonoBehaviour, IDispose
         action.Disable();
 
         action.Player.Look.performed -= i => CameraInput = i.ReadValue<Vector2>();
+        action.UI.Cancel.performed -= CancelPerformed;
         action.Player.Attack.performed -= InteractPerformed;
     }
 
     public void Dispose(UnsubscibeSignal signal)
     {
-        eventBus.Unsubscribe<ChangeActionSignal>(SetAction<ChangeActionSignal>);
+        
     }
 
 
@@ -53,8 +52,8 @@ public class InputManager : MonoBehaviour, IDispose
         act.Act();
     }
 
-    private void SetAction<T>(T signal) where T : ISignal
+    private void CancelPerformed(InputAction.CallbackContext context)
     {
-        act = FindAnyObjectByType<Player>().mainAction;
+        act.Cancel();
     }
 }

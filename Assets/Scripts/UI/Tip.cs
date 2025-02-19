@@ -9,9 +9,9 @@ public class Tip : MonoBehaviour
         cam = Camera.main;
     }
 
-    public void Move(Vector3 mousePos)
+    public void Move(Vector3 mousePos,Quaternion rotation)
     {
-        transform.rotation = cam.transform.rotation;
+        transform.rotation = rotation;
         Vector3 posWithOffset = mousePos - offset;
 
         transform.localPosition = posWithOffset;
@@ -19,6 +19,6 @@ public class Tip : MonoBehaviour
 
     private void OnEnable()
     {
-        offset = new Vector3(0, transform.localScale.y / 2 + 2, 0);
+        offset = new Vector3(0, transform.localScale.y / 2, transform.localScale.z / 2);
     }
 }

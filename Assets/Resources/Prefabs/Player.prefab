@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 9110233440228031144}
   - component: {fileID: 8333139073673564832}
   - component: {fileID: 3021782145506326998}
-  - component: {fileID: 7286609326230966519}
   - component: {fileID: 3352657251881602830}
   - component: {fileID: 1930625286503205454}
   m_Layer: 0
@@ -78,25 +77,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd55c0851364db649b42eca758971e0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  personName: "\u0414\u0435\u0431\u0438\u043B"
+  personName: 
   maxHit: 0
   hits: 0
   intervalHits: 0
   typeOfPerson: 0
   canUse: 0
   orientation: {fileID: 5014593342074208144}
---- !u!114 &7286609326230966519
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5406797630097505474}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 353ab81c664fd144798a6301ea1c1ab4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &3352657251881602830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,6 +112,7 @@ MonoBehaviour:
   classLevel: 1
   points: 0
   pointsToNextLevel: 0
+  pointsPresLevel: 0
   proficiencyBonus: 2
 --- !u!1 &8425405015594022778
 GameObject:
@@ -135,6 +123,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5014593342074208144}
+  - component: {fileID: 547608776246988604}
   m_Layer: 0
   m_Name: Orientation
   m_TagString: Untagged
@@ -157,3 +146,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7418984281206540314}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &547608776246988604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8425405015594022778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 611edc72da8c6f04f8d227cd40561fdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  soundtracksPath:
+  - olddog
+  - phalanx
+  audioSourcePath: MusicPrefab

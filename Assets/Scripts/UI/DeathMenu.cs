@@ -12,6 +12,13 @@ public class DeathMenu : MonoBehaviour
     private Slider slider;
     [SerializeField] TMPro.TMP_Text bestScore;
     private DNDClasses playerClass;
+    private int points;
+
+    public void Init(DNDClasses playerClass, SaveManager saveMan)
+    {
+        this.playerClass = playerClass;
+        points = saveMan.LoadPoints();
+    }
 
     private void OnEnable()
     {
@@ -19,10 +26,9 @@ public class DeathMenu : MonoBehaviour
         restart.onClick.AddListener(Restart);
         playerClass = GameObject.Find("Player").GetComponent<DNDClasses>();
 
-
         slider = sliderGO.GetComponentInChildren<Slider>();
         slider.maxValue = playerClass.pointsToNextLevel;
-        slider.value = ServiceLocator.Instance.Get<SaveManager>().LoadPoints();
+        slider.value = points;
 
         buttonsGO.SetActive(false);
         sliderGO.SetActive(false);
@@ -31,7 +37,7 @@ public class DeathMenu : MonoBehaviour
 
     public void ToMainMenu()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(0);
     }
 
     public void Restart()
@@ -65,7 +71,7 @@ public class DeathMenu : MonoBehaviour
     {
         for (int score = 0; score < signal; score++) {
             bestScore.text = $"Ваш результат: {score}";
-            await Task.Delay(20);
+            await Task.Delay(40 / (int)Mathf.Log(signal));
         }
     }
 }

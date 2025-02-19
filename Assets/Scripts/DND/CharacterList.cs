@@ -24,7 +24,6 @@ public class CharacterList : MonoBehaviour, IInteractable
 
     public void Init(DNDPerson person)
     {
-        this.PersonName.text = person.personName;
         this.Savethrows.text = person.savethrowsFromDeath.ToString();  
     }
 

@@ -26,21 +26,15 @@ public class HUD : MonoBehaviour, IDispose
 
     public async void HealAction(HealSignal signal)
     {
-        if(signal.Person == TypeOfPerson.PLAYER)
-        {
-            Heal.SetActive(true);
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
-            Heal.SetActive(false);
-        }
+        Heal.SetActive(true);
+        await Task.Delay(TimeSpan.FromSeconds(.5f));
+        Heal.SetActive(false);
     }
     public async void DamageAction(DamageSignal signal)
     {
-        if(signal.Person == TypeOfPerson.PLAYER)
-        {
-            Damage.SetActive(true);
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
-            Damage.SetActive(false);
-        } 
+        Damage.SetActive(true);
+        await Task.Delay(TimeSpan.FromSeconds(.5f));
+        Damage.SetActive(false);
     }
 
 

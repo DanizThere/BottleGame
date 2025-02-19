@@ -37,6 +37,7 @@ Transform:
   - {fileID: 5105842150680185168}
   - {fileID: 7158077074042624909}
   - {fileID: 6603460836360657445}
+  - {fileID: 7931436813919319223}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &730528048004679769
@@ -129,6 +130,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e4acad3da29fd4c81b2ee285a89b2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1141762967391967208
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7931436813919319223}
+  - component: {fileID: 3590022845745116228}
+  m_Layer: 0
+  m_Name: SettingsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7931436813919319223
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1141762967391967208}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2273517729067966966}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3590022845745116228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1141762967391967208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5264c5f0e171c041925ab519c6f4084, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1703288381175351517
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,6 +220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9d2a2352b6bef142a46b87c62fe1d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  musicManager: {fileID: 0}
   pointsInGame: 0
 --- !u!114 &8214917000802979022
 MonoBehaviour:
@@ -183,7 +229,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1703288381175351517}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc11d00defc48d14b921dfb5854060d9, type: 3}
   m_Name: 
@@ -199,7 +245,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1703288381175351517}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2692cf24f5eb15b45ba9a80d9b73c1f4, type: 3}
   m_Name: 
@@ -389,7 +435,8 @@ MonoBehaviour:
   - {fileID: 3467808311149966743, guid: f7cc6a8f85ad713469d5b788a5bb71a9, type: 3}
   - {fileID: 2601313128411641361, guid: 9138b4ea22538e14ab38f21e5b9adf31, type: 3}
   - {fileID: 3220470915890570577, guid: bc9d4b00f1c547f459c891e358e2736c, type: 3}
-  ParentTransform: {fileID: 0}
+  - {fileID: 9075123569464465078, guid: 4b4c67776d21f7d4f8cd67acff87eb15, type: 3}
+  - {fileID: 506375955679257963, guid: f9868598ff0f28b4b877cdc240ad4360, type: 3}
   BottlesExist: []
   CountOfBottles: 5
   bottleUseSound: {fileID: 8300000, guid: e0e7f0b776f24964baa497af32319aef, type: 3}
@@ -438,10 +485,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b686cd1113434f46bfcbecf40c6c16d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  listManager: {fileID: 5698103471668180689}
   characterList: {fileID: 0}
   DeadMenu: {fileID: 0}
   DialogueUI: {fileID: 0}
+  whoTell: {fileID: 0}
+  output: {fileID: 0}
+  ScrollBarForNames: {fileID: 0}
+  resourcePath: TextPrefab
 --- !u!114 &3264449814267614073
 MonoBehaviour:
   m_ObjectHideFlags: 0

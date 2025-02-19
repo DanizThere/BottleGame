@@ -16,10 +16,29 @@ public class CommonBottle : MonoBehaviour
         eventBus = serviceLocator.Get<EventBus>();
     }
 
+    private void Awake()
+    {
+        gameObject.name = $"{GetType()}";
+    }
+
     public virtual void TakeEffect(DNDPerson person)
     {
-        if(person.typeOfPerson == TypeOfPerson.PLAYER) serviceLocator.Get<GameManager>().pointsInGame += Points;
         serviceLocator.Get<BottlesManager>().ReleaseBottle(this);
-        eventBus.Invoke(new TakeEffectSignal(person.typeOfPerson));
+        eventBus.Invoke(new IntermediateSignal());
+    }
+
+    public virtual void TakeEffect(Player player)
+    {
+        serviceLocator.Get<GameManager>().pointsInGame += Points;
+        serviceLocator.Get<GameManager>().turnManager.AddTurn(player.turnValue);
+        serviceLocator.Get<BottlesManager>().ReleaseBottle(this);
+        eventBus.Invoke(new IntermediateSignal());
+    }
+
+    public virtual void TakeEffect(Enemy enemy)
+    {
+        serviceLocator.Get<BottlesManager>().ReleaseBottle(this);
+        serviceLocator.Get<GameManager>().turnManager.AddTurn(enemy.turnValue);
+        eventBus.Invoke(new IntermediateSignal());
     }
 }

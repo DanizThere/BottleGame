@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class DialogueManager : MonoBehaviour, IService, IDispose
@@ -11,11 +12,10 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
     private CancellationTokenSource token = new CancellationTokenSource();
 
     [SerializeField] private SimpleSentence[] sentencesPrefab;
-
+    
     public void Init(Transform player, TextWriting txtWriting, EventBus bus)
     {
         this.player = player;
-
         eventBus = bus;
         textWriting = txtWriting;
 
@@ -84,7 +84,6 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
         token = new CancellationTokenSource();
         return token;
     }
-
 
     public void Dispose(UnsubscibeSignal signal)
     {

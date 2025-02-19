@@ -6,7 +6,7 @@ using UnityEngine;
 public class SaveFile
 {
     private readonly string filePath;
-    public SaveFile(int SaveNumber)
+    public SaveFile(int SaveNumber = 1)
     {
         var directory = Application.persistentDataPath + "/saves";
         if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
@@ -69,7 +69,6 @@ public class SettingsFile
 }
 
 
-[Serializable]
 public class SaveData
 {
     public string PersonName = "Без имени";
@@ -78,9 +77,17 @@ public class SaveData
     public int RecordScore = 0;
 }
 
-
-[Serializable]
 public class SettingsData
 {
-    public float Volume;
+    public float MasterVolume = .2f;
+    public float MusicVolume = .2f;
+    public float SfxVolume = .2f;
+
+    public int QualityLevel = 0;
+    public int AntiAlising = QualitySettings.antiAliasing;
+
+    public bool screenMode = true;
+    public int vSyncCount = QualitySettings.vSyncCount;
+    public int ResolutionX = Screen.currentResolution.width;
+    public int ResolutionY = Screen.currentResolution.height;
 }

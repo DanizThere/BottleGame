@@ -1,21 +1,31 @@
-using System;
-using System.Threading.Tasks;
-
 public class DamageBottle : CommonBottle
 {
     public int damage = 2;
     public int iterations = 5;
 
-    public override async void TakeEffect(DNDPerson person)
+    public void StandardEffect(DNDPerson person)
     {
-        base.TakeEffect(person);
-        for (int i = 0; i < iterations; i++)
-        {
-            person.TakeDamage(damage);
-            eventBus.Invoke(new DamageSignal(person.maxHit, person.typeOfPerson));
-            await Task.Delay(TimeSpan.FromSeconds(1f));
-        }
+        person.TakeDamage(damage);
         person.CheckHP();
         person.MinusLevelOfStress(damage * iterations);
+    }
+
+    public override void TakeEffect(DNDPerson person)
+    {
+        base.TakeEffect(person);
+        StandardEffect(person);
+    }
+
+    public override void TakeEffect(Player player)
+    {
+        base.TakeEffect(player);
+        StandardEffect(player);
+        eventBus.Invoke(new DamageSignal(player.maxHit));
+    }
+
+    public override void TakeEffect(Enemy enemy)
+    {
+        base.TakeEffect(enemy);
+        StandardEffect(enemy);
     }
 }

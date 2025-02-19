@@ -1,44 +1,33 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BottlesManager : MonoBehaviour, IService, IDispose
 {
-    private Transform[] bottlesTransform;
     private Dictionary<float, PoolObject<CommonBottle>> bottlesPool = new Dictionary<float, PoolObject<CommonBottle>>();
     [Header("Bottles Prefab")]
     [SerializeField] private GameObject[] bottles;
-    [SerializeField] private Transform ParentTransform;
     public List<CommonBottle> BottlesExist = new List<CommonBottle>();
     public int CountOfBottles = 5;
 
     private EventBus eventBus;
     private SoundManager soundManager;
     [SerializeField] private AudioClip bottleUseSound;
-    private void Awake()
-    {
-        for(int i = 0; i < bottles.Length; i++)
-        {
-            for(int j = 0; j < bottles.Length; j++)
-            {
-                if(bottles[i].GetComponent<CommonBottle>().weight < bottles[j].GetComponent<CommonBottle>().weight)
-                {
-                    var bottle = bottles[j];
-                    bottles[j] = bottles[i];
-                    bottles[i] = bottle;
-                }
-            }
-        }
-    }
 
-    public void Init(SoundManager sound, EventBus eventBus)
+    public void Init(SoundManager sound ,EventBus eventBus)
     {
         AddBottle();
 
         soundManager = sound;
-        bottlesTransform = ParentTransform.GetComponentsInChildren<Transform>();
 
         this.eventBus = eventBus;
-        eventBus.Subscribe<TakeEffectSignal>(CheckBottles);
+        
+
+    }
+
+    private void Start()
+    {
+        eventBus.Subscribe<IntermediateSignal>(CheckBottles);
         eventBus.Subscribe<EndBottlesSignal>(SetRandomBottles);
         eventBus.Invoke(new EndBottlesSignal(CountOfBottles));
 
@@ -56,7 +45,7 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
         }
     }
 
-    public void CheckBottles(TakeEffectSignal signal)
+    public void CheckBottles(IntermediateSignal signal)
     {
         if (BottlesExist.Count == 0)
         {
@@ -66,6 +55,19 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
 
     private void AddBottle()
     {
+        for (int i = 0; i < bottles.Length; i++)
+        {
+            for (int j = 0; j < bottles.Length; j++)
+            {
+                if (bottles[i].GetComponent<CommonBottle>().weight < bottles[j].GetComponent<CommonBottle>().weight)
+                {
+                    var bottle = bottles[j];
+                    bottles[j] = bottles[i];
+                    bottles[i] = bottle;
+                }
+            }
+        }
+
         foreach (var bottle in bottles)
         {
             Spawn(bottle.GetComponent<CommonBottle>());
@@ -83,11 +85,32 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
                 {
                     var gm = bottlesPool[bottles.Key].Get();
                     BottlesExist.Add(gm);
-                    gm.transform.position = bottlesTransform[i].position;
+                    gm.transform.localPosition = new Vector3(i, -.4f, Mathf.Pow(-1, i) / 4);
                     break;
                 }
             }
         }
+        eventBus.Invoke(new HandleTextSignal(ShowCurrentBottles()));
+    }
+
+    public string ShowCurrentBottles()
+    {
+        string bottlesInARow = "В этом раунде следующие бутылки: ";
+
+        var a = BottlesExist.GroupBy(p => p.name).Where(p => p.Count() > 0).Select(p => p.Count() +" "+ p.Key).ToArray();
+
+        for(int i = 0; i < a.Length; i++)
+        {
+            if(i == a.Length - 1)
+            {
+                bottlesInARow += $"{a[i]}.";
+            }
+            else
+            {
+                bottlesInARow += $"{a[i]},";
+            }
+        }
+        return bottlesInARow;
     }
 
     public void ReleaseBottle(CommonBottle bottle)
@@ -99,7 +122,7 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
 
     public void Dispose(UnsubscibeSignal signal)
     {
-        eventBus.Unsubscribe<TakeEffectSignal>(CheckBottles);
+        eventBus.Unsubscribe<IntermediateSignal>(CheckBottles);
         eventBus.Unsubscribe<EndBottlesSignal>(SetRandomBottles);
     }
 }

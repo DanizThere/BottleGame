@@ -8,6 +8,11 @@ public class ListManager : MonoBehaviour
 
     public int points = 25;
 
+    private void Start()
+    {
+        DisableAllButtonsInList();
+    }
+
     private void FixedUpdate()
     {
         if (pointsText != null)

@@ -17,14 +17,13 @@ public class CameraMove : MonoBehaviour, IMoveable, IDispose
     private void Start()
     {
         cam = Camera.main;
-
-        canMove = true;
-
         inputManager = FindAnyObjectByType<InputManager>();
 
         player = FindAnyObjectByType<Player>();
 
         eventBus = ServiceLocator.Instance.Get<EventBus>();
+        eventBus.Subscribe<OnUISignal>(OnUI);
+        eventBus.Subscribe<OffUISignal>(OffUI);
         eventBus.Subscribe<StopPlaySignal>(SetMoveFalse);
         eventBus.Subscribe<StopPlaySignal>(SetOriginalCamera);
         eventBus.Subscribe<StartPlaySignal>(SetMoveTrue);
@@ -72,23 +71,29 @@ public class CameraMove : MonoBehaviour, IMoveable, IDispose
         rotX = 0;
         rotY = 0;
         transform.rotation = Quaternion.identity;
-        orientation.rotation = Quaternion.identity;
     }
 
     public void SetMoveTrue(StartPlaySignal signal)
     {
         canMove = true;
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void SetMoveFalse(StopPlaySignal signal)
     {
         canMove = false;
+    }
+
+    public void OnUI(OnUISignal signal)
+    {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
 
+    public void OffUI(OffUISignal signal)
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     public void Dispose(UnsubscibeSignal signal)
     {

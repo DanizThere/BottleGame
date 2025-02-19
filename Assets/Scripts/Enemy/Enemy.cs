@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -6,13 +5,23 @@ using UnityEngine;
 public class Enemy : DNDPerson, IEnemy, IAction, IDispose
 {
     private List<CommonBottle> bottles;
+    private bool canPlay;
+
+    private void Awake()
+    {
+        personClass = GetComponent<DNDClasses>();
+
+        PersonInit(1.5f, personClass, TypeOfPerson.ENEMY, 120, 1, 8, 8, 8, 8, 8, 8, "Враг без имени");
+    }
+
     private void Start()
     {
-        typeOfPerson = TypeOfPerson.ENEMY;
+        canPlay = true;
 
         eventBus = ServiceLocator.Instance.Get<EventBus>();
         eventBus.Subscribe<EnemyTurnSignal>(ActSignal, 2);
         eventBus.Subscribe<EnemyTurnSignal>(UpdateBottles<EnemyTurnSignal>, 0);
+        eventBus.Subscribe<DeathSignal>(DontPlay);
 
         eventBus.Subscribe<UnsubscibeSignal>(Dispose);
     }
@@ -20,7 +29,13 @@ public class Enemy : DNDPerson, IEnemy, IAction, IDispose
     public async void Act()
     {
         await Task.Delay(3000);
-        bottles[UnityEngine.Random.Range(0, bottles.Count)].GetComponent<CommonBottle>().TakeEffect(this);
+        if (!canPlay) return;
+        bottles[Random.Range(0, bottles.Count)].GetComponent<CommonBottle>().TakeEffect(this);
+    }
+
+    public void DontPlay(DeathSignal signal)
+    {
+        canPlay = false;
     }
 
     public void ActSignal(EnemyTurnSignal signal)
@@ -60,6 +75,8 @@ public class Enemy : DNDPerson, IEnemy, IAction, IDispose
     {
         eventBus.Unsubscribe<EnemyTurnSignal>(ActSignal);
         eventBus.Unsubscribe<EnemyTurnSignal>(UpdateBottles<EnemyTurnSignal>);
+        eventBus.Unsubscribe<DeathSignal>(DontPlay);
+
     }
 
     public override void CheckHP()

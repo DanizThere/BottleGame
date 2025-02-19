@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -11,18 +12,16 @@ public class ServiceLocatorLoader : MonoBehaviour
     [SerializeField] private DNDDictionary dictionary;
     [SerializeField] private SaveManager saveManager;
     [SerializeField] private UIManager uiManager;
+    [SerializeField] private SettingManager settingManager;
 
     [SerializeField] private ListManager listManager;
 
-    [SerializeField] TMPro.TMP_Text whoTell, output;
     [SerializeField] private string resourcePath;
 
-    private TextWriting textWriting;
     private EventBus eventBus;
     private Player player;
-    private void OnEnable()
+    private void Awake()
     {
-        textWriting = gameManager.AddComponent<TextWriting>();
         eventBus = new EventBus();
         player = FindAnyObjectByType<Player>();
         ServiceLocator.Initialize();
@@ -30,19 +29,23 @@ public class ServiceLocatorLoader : MonoBehaviour
         ServiceLocator.Instance.Register<GameManager>(gameManager);
         ServiceLocator.Instance.Register<SoundManager>(soundManager);
         ServiceLocator.Instance.Register<EventBus>(eventBus);
-        ServiceLocator.Instance.Register<TextWriting>(textWriting);
         ServiceLocator.Instance.Register<DialogueManager>(dialogueManager);
         ServiceLocator.Instance.Register<DNDDictionary>(dictionary);
         ServiceLocator.Instance.Register<SaveManager>(saveManager);
         ServiceLocator.Instance.Register<UIManager>(uiManager);
         ServiceLocator.Instance.Register<BottlesManager>(bottlesManager);
+        ServiceLocator.Instance.Register<SettingManager>(settingManager);
 
         gameManager.Init(eventBus, player, saveManager);
-        textWriting.Init(whoTell, output);
         saveManager.Init(player);
         soundManager.Init(resourcePath);
-        dialogueManager.Init(player.transform, textWriting, eventBus);
         bottlesManager.Init(soundManager, eventBus);
-        uiManager.Init(player, listManager, eventBus);
+        uiManager.Init(player, listManager, dialogueManager, saveManager, eventBus);
+    }
+
+    private void Start()
+    {
+        
     }
 }
+

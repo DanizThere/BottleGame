@@ -47,6 +47,7 @@ public class EventBus : IService
                 var callback = obj.Callback as Action<T>;
                 callback?.Invoke(signal);
             }
+            Debug.Log($"{key} is invoked");
         }
     }
 }

@@ -8,7 +8,6 @@ public class ListCell : MonoBehaviour, IInteractable, IDescription
     [SerializeField] protected string desc = "Здесь ты можешь повысить/понизить свои статы.";
     [SerializeField] protected string nameOf = "Поле модификатора";
 
-
     public string Description { get; set; }
     public string NameOfInteract { get; set; }
 
@@ -20,16 +19,17 @@ public class ListCell : MonoBehaviour, IInteractable, IDescription
         NameOfInteract = nameOf;
     }
 
-    public virtual async void SelectCell(Player player)
+    public virtual async void SelectCell()
     {
         ServiceLocator.Instance.Get<UIManager>().listManager.DisableAllButtonsInList();
         Vector3 letterPos = transform.TransformPoint(-offset);
         await player.Flow(letterPos,transform.rotation);
     }
 
-    public void Interact()
+    public virtual void Interact()
     {
-        SelectCell(player);
+        SelectCell();
+        ServiceLocator.Instance.Get<GameManager>().SetGameState(GameState.On_UI);
     }
 
 }

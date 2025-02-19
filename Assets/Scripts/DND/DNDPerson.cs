@@ -13,13 +13,13 @@ public abstract class DNDPerson : MonoBehaviour
     protected int levelOfStress;
     protected int maxLevelOfStress;
     protected float stressMultipliyer;
-    protected DNDClasses personClass;
+    public DNDClasses personClass { get; protected set; }
     public int savethrowsFromDeath { get; protected set; } = 3;
     public int maxHit;
     public int hits;
     public int intervalHits;
     public TypeOfPerson typeOfPerson;
-
+    public int turnValue { get; protected set; } = 0;
     protected EventBus eventBus;
 
     public virtual void PersonInit(float stressMultipliyer, DNDClasses personClass, TypeOfPerson typeOfPerson, int maxLevelOfStress, int savethrowsFromDeath, int characteristicStrength, int characteristicDexterity, int characteristicConstitution, int characteristicIntelligence, int characteristicWisdom, int characteristicCharisma, string personName)
@@ -31,6 +31,7 @@ public abstract class DNDPerson : MonoBehaviour
         this.typeOfPerson = typeOfPerson;
         this.savethrowsFromDeath = savethrowsFromDeath;
         this.personName = personName;
+        turnValue = (int)typeOfPerson;
 
         characteristics.Add("Strength", new int[] { characteristicStrength, SetValue(characteristicStrength) });
         characteristics.Add("Dexterity", new int[] { characteristicDexterity, SetValue(characteristicDexterity) });

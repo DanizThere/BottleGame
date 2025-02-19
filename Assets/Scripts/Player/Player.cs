@@ -3,15 +3,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class Player : DNDPerson, IDispose
+public class Player : DNDPerson, IPlayerInput, IAction, IDispose
 {
     private CameraMove cam;
     private CameraHandle cameraHandle;
     private Camera cams;
-    private PlayerCommon PlayerCommon;
-    private PlayerAction PlayerAction;
+    private GameManager gameManager;
+
     public bool canUse;
-    public IAction mainAction { get; private set; }
     private bool handleAction;
     private Quaternion originalQuaternion;
     private Vector3 originalVector;
@@ -25,48 +24,25 @@ public class Player : DNDPerson, IDispose
         originalVector = transform.position;
 
         personClass = GetComponent<DNDClasses>();
-        PlayerAction = GetComponent<PlayerAction>();
-        PlayerCommon = GetComponent<PlayerCommon>();
         cams = Camera.main;
         cam = cams.GetComponent<CameraMove>();
         cameraHandle = FindAnyObjectByType<CameraHandle>();
 
-        canUse = true;
-
         PersonInit(1.1f, personClass, TypeOfPerson.PLAYER, 100, 1, 8, 8, 8, 8, 8, 8, "Без имени");
-
-        PlayerCommon.Init(this, cam);
-        mainAction = PlayerCommon;
 
         CancellationTokenSource = new CancellationTokenSource();
         CancellationToken = CancellationTokenSource.Token;
     }
 
-    public override void PersonInit(float stressMultipliyer, DNDClasses personClass, TypeOfPerson typeOfPerson, int maxLevelOfStress, int savethrowsFromDeath, int characteristicStrength, int characteristicDexterity, int characteristicConstitution, int characteristicIntelligence, int characteristicWisdom, int characteristicCharisma, string personName)
-    {
-        base.PersonInit(stressMultipliyer, personClass, typeOfPerson, maxLevelOfStress, savethrowsFromDeath, characteristicStrength, characteristicDexterity, characteristicConstitution, characteristicIntelligence, characteristicWisdom, characteristicCharisma, personName);
-    }
-
     private void Start()
     {
         eventBus = ServiceLocator.Instance.Get<EventBus>();
+        gameManager = ServiceLocator.Instance.Get<GameManager>();
 
-        eventBus.Subscribe<ChangeActionSignal>(SetAction);
         eventBus.Subscribe<StartUseSignal>(SetUseTrue);
         eventBus.Subscribe<StopUseSignal>(SetUseFalse);
         eventBus.Subscribe<UnsubscibeSignal>(Dispose);
 
-    }
-
-    private void LateUpdate()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape)) { FlowToFormerPos(); }
-    }
-
-    private void SetAction(ChangeActionSignal signal)
-    {
-        mainAction = handleAction == true ? PlayerCommon : PlayerAction;
-        handleAction = !handleAction;   
     }
 
     public void SetUseTrue(StartUseSignal signal)
@@ -78,7 +54,6 @@ public class Player : DNDPerson, IDispose
 
     public void Dispose(UnsubscibeSignal signal)
     {
-        eventBus.Unsubscribe<ChangeActionSignal>(SetAction);
     }
 
     public override void CheckHP()
@@ -107,25 +82,25 @@ public class Player : DNDPerson, IDispose
 
         await DoFlow(formerPos, destination, rotation, CancellationToken);
 
-        orientation.rotation = Quaternion.identity;
+        orientation.rotation = rotation;
         transform.position = destination;
     }
 
     private async Task DoFlow(Vector3 origPos, Vector3 destination, Quaternion rotation, CancellationToken token)
     {
-        if (token.IsCancellationRequested)
+        token.Register(() =>
         {
             return;
-        }
+        });
+        orientation.rotation = rotation;
         for (float t = 0; t < 1f; t += Time.deltaTime)
         {
             if(token.IsCancellationRequested)
             {
                 transform.position = destination;
-                t = 1;
                 break;
             }
-            cameraHandle.HandleRotate(orientation, t);
+            cameraHandle.HandleRotate(orientation, t * 10);
             transform.position = Vector3.MoveTowards(origPos, destination, t * 10);
 
             await Task.Delay(TimeSpan.FromSeconds(.001f));
@@ -136,12 +111,18 @@ public class Player : DNDPerson, IDispose
     {
         if (transform.position == originalVector) { 
             CancelToken();
-            orientation.rotation = Quaternion.identity;
+            orientation.rotation = originalQuaternion;
         }
 
         Vector3 formerPos = transform.position;
 
-        await DoFlow(formerPos, originalVector, originalQuaternion, CancellationToken);
+        for (float t = 0; t < 1f; t += Time.deltaTime)
+        {
+            cameraHandle.HandleRotate(transform, t * 10);
+            transform.position = Vector3.MoveTowards(transform.position, originalVector, t * 10);
+
+            await Task.Delay(TimeSpan.FromSeconds(.001f));
+        }
     }
 
     private void CancelToken()
@@ -150,5 +131,60 @@ public class Player : DNDPerson, IDispose
 
         CancellationTokenSource = new CancellationTokenSource();
         CancellationToken = CancellationTokenSource.Token;
+    }
+
+    public void Act()
+    {
+        if (!canUse) return;
+
+        RaycastHit hit;
+        if (Physics.Raycast(cam.MouseOnWorldScreen(), out hit))
+        {
+            var bottle = hit.collider.GetComponent<CommonBottle>();
+            var characterList = hit.collider.GetComponent<CharacterList>();
+            var cell = hit.collider.GetComponent<ListCell>();
+            if (bottle != null)
+            {
+                bottle.TakeEffect(this);
+            }
+            if (characterList != null)
+            {
+                Use(characterList);
+            }
+            if (cell != null)
+            {
+                Use(cell);
+            }
+            Debug.Log(hit.collider.gameObject.name);
+        }
+    }
+
+    public void Use(IInteractable interactable)
+    {
+        interactable.Interact();
+    }
+
+    public void Cancel()
+    {
+        if (gameManager.GameState == GameState.On_UI)
+        {
+            ServiceLocator.Instance.Get<GameManager>().SetGameState(GameState.On_Game);
+            FlowToFormerPos();
+            ServiceLocator.Instance.Get<UIManager>().listManager.DisableAllButtonsInList();
+        }
+
+    }
+
+    public void TryBelief(DNDPerson person, CommonBottle bottle)
+    {
+        if (person.CanBelief())
+        {
+            if (person.characteristics["Charisma"][1] > UnityEngine.Random.Range(0, (int)Dices.D20))
+            {
+                bottle.TakeEffect(person);
+                person.PlusLevelOfStress(30);
+            }
+            return;
+        }
     }
 }
