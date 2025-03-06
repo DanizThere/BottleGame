@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,22 +10,23 @@ public class DeathMenu : MonoBehaviour
     [SerializeField] private Button restart;
     [SerializeField] private GameObject sliderGO;
     [SerializeField] private GameObject buttonsGO;
-    private Slider slider;
     [SerializeField] TMPro.TMP_Text bestScore;
+    private Slider slider;
     private DNDClasses playerClass;
     private int points;
+    private Func<SaveManager> saveManager;
 
-    public void Init(DNDClasses playerClass, SaveManager saveMan)
+    public void Init(DNDClasses playerClass, Func<SaveManager> saveMan)
     {
         this.playerClass = playerClass;
-        points = saveMan.LoadPoints();
+        saveManager = saveMan;
+        points = saveManager().LoadPoints();
     }
 
-    private void OnEnable()
+    private void Start()
     {
         exit.onClick.AddListener(ToMainMenu);
         restart.onClick.AddListener(Restart);
-        playerClass = GameObject.Find("Player").GetComponent<DNDClasses>();
 
         slider = sliderGO.GetComponentInChildren<Slider>();
         slider.maxValue = playerClass.pointsToNextLevel;
@@ -32,7 +34,6 @@ public class DeathMenu : MonoBehaviour
 
         buttonsGO.SetActive(false);
         sliderGO.SetActive(false);
-
     }
 
     public void ToMainMenu()
@@ -57,21 +58,21 @@ public class DeathMenu : MonoBehaviour
     }
 
 
-    private async Task UpdatePoints(int points)
+    private async Awaitable UpdatePoints(int points)
     {
         sliderGO.gameObject.SetActive(true);
         for (int i = 0; i < points; i++) {
             Debug.Log(points);
             slider.value++;
-            await Task.Delay(5);
+            await Awaitable.WaitForSecondsAsync(.5f);
         }
     }
 
-    private async Task CurrentScore(int signal)
+    private async Awaitable CurrentScore(int signal)
     {
         for (int score = 0; score < signal; score++) {
             bestScore.text = $"Ваш результат: {score}";
-            await Task.Delay(40 / (int)Mathf.Log(signal));
+            await Awaitable.WaitForSecondsAsync(0.2f / (int)Mathf.Log(signal));
         }
     }
 }

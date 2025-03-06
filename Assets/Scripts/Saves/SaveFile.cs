@@ -86,7 +86,7 @@ public class SettingsData
     public int QualityLevel = 0;
     public int AntiAlising = QualitySettings.antiAliasing;
 
-    public bool screenMode = true;
+    public bool screenMode = false;
     public int vSyncCount = QualitySettings.vSyncCount;
     public int ResolutionX = Screen.currentResolution.width;
     public int ResolutionY = Screen.currentResolution.height;

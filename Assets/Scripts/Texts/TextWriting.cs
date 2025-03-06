@@ -17,26 +17,26 @@ public class TextWriting : MonoBehaviour, IService
 
 
     //Написание предложения. Отсутствует скриптовый объект, только сам текст. Использовать как мысли и т.п.
-    public async Task Say(string sentence, float duration = .08f, float awaitSec = 1f)
+    public async Awaitable Say(string sentence, float duration = .08f, float awaitSec = 1f)
     {
         ClearField();
         foreach (char c in sentence) {
             output.text += c;
-            await Task.Delay(TimeSpan.FromSeconds(duration));
+            await Awaitable.WaitForSecondsAsync(duration);
         }
-        await Task.Delay(TimeSpan.FromSeconds(awaitSec));
+        await Awaitable.WaitForSecondsAsync(awaitSec);
     }
 
 
-    public async Task Say(Sentence sentence, float awaitSec = 1f)
+    public async Awaitable Say(Sentence sentence, float awaitSec = 1f)
     {
         whoTell.text = sentence.author;
         output.text = sentence.text;
-        await Task.Delay(TimeSpan.FromSeconds(awaitSec));
+        await Awaitable.WaitForSecondsAsync(awaitSec);
     }
 
     //Написание предложения. Стандарт. Есть возможность озвучки
-    public async Task Say(Sentence sentence, Transform soundTransform, CancellationToken token,float duration = .08f, float awaitSec = 1f)
+    public async Awaitable Say(Sentence sentence, Transform soundTransform, CancellationToken token,float duration = .08f, float awaitSec = 1f)
     {
         int i = 0;
         token.Register(() =>
@@ -62,24 +62,24 @@ public class TextWriting : MonoBehaviour, IService
         for (; i < sentence.text.Length; i++)
         {
             output.text += sentence.text[i];
-            await Task.Delay(TimeSpan.FromSeconds(duration));
+            await Awaitable.WaitForSecondsAsync(duration);
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(awaitSec));
+        await Awaitable.WaitForSecondsAsync(awaitSec);
 
     }
 
-    public async Task SayAt(TMPro.TMP_Text outputField, string Text, float duration = 0.08f, float awaitSet = 1f)
+    public async Awaitable SayAt(TMPro.TMP_Text outputField, string Text, float duration = 0.08f, float awaitSet = 1f)
     {
         outputField.text = null;
         for (int i = 0; i < Text.Length; i++)
         {
             outputField.text += Text[i];
-            await Task.Delay(TimeSpan.FromSeconds(duration));
+            await Awaitable.WaitForSecondsAsync(duration);
 
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(awaitSet));
+        await Awaitable.WaitForSecondsAsync(awaitSet);
     }
 
 

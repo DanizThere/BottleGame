@@ -2,28 +2,27 @@ using UnityEngine;
 
 public class PermamentDeathBottle : CommonBottle
 {
-    public void StandardEffect(DNDPerson person)
+    public void StandardEffect(DNDManipulator person)
     {
         person.SetHits(0);
         person.CheckHP();
         person.MinusLevelOfStress(50);
     }
-    public override void TakeEffect(DNDPerson person)
+    public override void TakeEffect(DNDManipulator person)
     {
         base.TakeEffect(person);
         StandardEffect(person);
     }
-
-    public override void TakeEffect(Enemy enemy)
-    {
-        base.TakeEffect(enemy);
-        StandardEffect(enemy);
-    }
-
-    public override void TakeEffect(Player player)
+    public override void SetEffect(Player player)
     {
         base.TakeEffect(player);
-        StandardEffect(player);
-        eventBus.Invoke(new DamageSignal(player.maxHit));
+        StandardEffect(player.dndManipulator);
+        eventBus.Invoke(new DamageSignal());
+    }
+
+    public override void SetEffect(Enemy enemy)
+    {
+        base.TakeEffect(enemy);
+        StandardEffect(enemy.manipulator);
     }
 }

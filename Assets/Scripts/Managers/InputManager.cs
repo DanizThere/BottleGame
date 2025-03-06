@@ -10,8 +10,6 @@ public class InputManager : MonoBehaviour, IDispose
     private void Awake()
     {
         action = new InputSystem_Actions();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     private void Start()

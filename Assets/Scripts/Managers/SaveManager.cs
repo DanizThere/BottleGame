@@ -1,11 +1,12 @@
+using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class SaveManager : MonoBehaviour, IService
 {
     private SaveFile saveFile;
     private SaveData saveData;
     private Player player;
-
     public void Init(Player player, int currentSaveFile = 1)
     {
         this.player = player;
@@ -17,13 +18,13 @@ public class SaveManager : MonoBehaviour, IService
 
     public void Save()
     {
-        saveData.PersonName = player.personName;
+        saveData.PersonName = player.dndManipulator.person.personName;
         saveFile.Save(saveData);
     }
 
     public void Save(int recordScore)
     {
-        saveData.PersonName = player.personName;
+        saveData.PersonName = player.dndManipulator.person.personName;
         saveData.RecordScore = recordScore;
         saveFile.Save(saveData);
     }
@@ -37,7 +38,7 @@ public class SaveManager : MonoBehaviour, IService
     public void Load()
     {
         saveData = saveFile.Load(new SaveData());
-        player.personName = saveData.PersonName;
+        player.dndManipulator.SetName(saveData.PersonName);
     }
 
     public int LoadPoints()

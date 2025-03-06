@@ -57,7 +57,7 @@ public class Timer : MonoBehaviour, IDispose
 
 
     //todo: переписать таймер, чтобы он начинался исключительно в момент наступления хода
-    private async Task WorkTimer(IntermediateSignal signal, CancellationToken token)
+    private async Awaitable WorkTimer(IntermediateSignal signal, CancellationToken token)
     {
         if (!canCount) return;
         do
@@ -69,7 +69,7 @@ public class Timer : MonoBehaviour, IDispose
             soundManager.PlaySoundRandom(clockTick, transform, .5f);
             eventBus.Invoke(new DisplayTimeSignal(timer));
             timer--;
-            await Task.Delay(1000);
+            await Awaitable.WaitForSecondsAsync(1);
         }
         while (timer >= 0);
         if (token.IsCancellationRequested)

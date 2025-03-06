@@ -1,0 +1,30 @@
+{
+    "Title": "Характеристики",
+    "Description": "Ваши характеристики влияют на то, с каким успехом вы можете сделать то или иное действие.",
+    "Characteristic":[
+        {
+            "Title": "Сила",
+            "Description": ""
+        },
+        {
+            "Title": "Телосложение",
+            "Description": ""
+        },
+        {
+            "Title": "Ловкость",
+            "Description": ""
+        },
+        {
+            "Title": "Интеллект",
+            "Description": ""
+        },
+        {
+            "Title": "Мудрость",
+            "Description": ""
+        },
+        {
+            "Title": "Харизма",
+            "Description": ""
+        }
+    ]
+}

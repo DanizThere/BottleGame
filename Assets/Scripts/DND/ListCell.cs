@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ListCell : MonoBehaviour, IInteractable, IDescription
 {
-    protected Player player;
+    protected PlayerMove player;
     public Vector3 offset;
 
     [SerializeField] protected string desc = "Здесь ты можешь повысить/понизить свои статы.";
@@ -13,7 +13,7 @@ public class ListCell : MonoBehaviour, IInteractable, IDescription
 
     private void Awake()
     {
-        player = FindAnyObjectByType<Player>();
+        player = FindAnyObjectByType<PlayerMove>();
 
         Description = desc;
         NameOfInteract = nameOf;

@@ -1,5 +1,4 @@
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class MusicMan : MonoBehaviour
@@ -10,14 +9,11 @@ public class MusicMan : MonoBehaviour
     private AudioSource audioSource;
     [SerializeField] private string audioSourcePath;
 
-    private Transform playerPos;
     CancellationTokenSource cancellationTokenSource;
     CancellationToken token;
 
-    public void Init(Transform player)
+    public void Init()
     {
-        playerPos = player;
-
         cancellationTokenSource = new CancellationTokenSource();
         token = cancellationTokenSource.Token;
 
@@ -32,7 +28,7 @@ public class MusicMan : MonoBehaviour
         CuzcoMusic(token);
     }
     //Кузко, музыку!
-    public async Task CuzcoMusic(CancellationToken token)
+    public async Awaitable CuzcoMusic(CancellationToken token)
     { 
         while (!token.IsCancellationRequested)
         {
@@ -41,8 +37,7 @@ public class MusicMan : MonoBehaviour
 
             audioSource.Play();
 
-            await Task.Delay(System.TimeSpan.FromSeconds(clip.length));
-            Debug.Log("play next");
+            await Awaitable.WaitForSecondsAsync(clip.length);
         }
     }
 

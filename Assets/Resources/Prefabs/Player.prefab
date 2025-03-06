@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 7418984281206540314}
   - component: {fileID: 9110233440228031144}
   - component: {fileID: 8333139073673564832}
-  - component: {fileID: 3021782145506326998}
-  - component: {fileID: 3352657251881602830}
-  - component: {fileID: 1930625286503205454}
+  - component: {fileID: 2359769870662402456}
+  - component: {fileID: 6097623751538455069}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -65,38 +64,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CameraInput: {x: 0, y: 0}
---- !u!114 &3021782145506326998
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5406797630097505474}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd55c0851364db649b42eca758971e0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  personName: 
-  maxHit: 0
-  hits: 0
-  intervalHits: 0
-  typeOfPerson: 0
-  canUse: 0
-  orientation: {fileID: 5014593342074208144}
---- !u!114 &3352657251881602830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5406797630097505474}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52c460e46b7959d41a20c3ef1b4cd71b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1930625286503205454
+--- !u!114 &2359769870662402456
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -114,6 +82,34 @@ MonoBehaviour:
   pointsToNextLevel: 0
   pointsPresLevel: 0
   proficiencyBonus: 2
+--- !u!114 &6097623751538455069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5406797630097505474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd55c0851364db649b42eca758971e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canUse: 0
+  orientation: {fileID: 5014593342074208144}
+  person:
+    personName: 
+    levelOfStress: 0
+    maxLevelOfStress: 0
+    stressMultipliyer: 0
+    savethrowsFromDeath: 0
+    maxHit: 0
+    hits: 0
+    intervalHits: 0
+    typeOfPerson: 0
+    turnValue: 0
+  classes: {fileID: 2359769870662402456}
+  duration: 0
+  magnitude: 0
 --- !u!1 &8425405015594022778
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,5 +156,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soundtracksPath:
   - olddog
-  - phalanx
   audioSourcePath: MusicPrefab

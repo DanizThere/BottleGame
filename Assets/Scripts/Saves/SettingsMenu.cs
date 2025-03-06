@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
@@ -54,8 +55,8 @@ public class SettingsMenu : MonoBehaviour
 
     public void SetWindowed()
     {
-        if (Windowed.isOn) Screen.fullScreen = true;
-        else Screen.fullScreen = false;
+        if (Windowed.isOn) Screen.fullScreen = false;
+        else Screen.fullScreen = true;
     }
 
     public void SetVSync()
@@ -67,5 +68,14 @@ public class SettingsMenu : MonoBehaviour
     public void ApplyChanges()
     {
         settingManager.SaveAll(QualitySettings.vSyncCount, Screen.currentResolution, QualitySettings.GetQualityLevel(), QualitySettings.antiAliasing, Windowed.isOn, SFX.value, Music.value, Master.value);
+    }
+    public void Exit()
+    {
+        Application.Quit();
+    }
+
+    public void LoadLevel(int level)
+    {
+        SceneManager.LoadScene(level);
     }
 }

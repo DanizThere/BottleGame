@@ -4,7 +4,6 @@ using UnityEngine;
 public class Item : ScriptableObject
 {
     public string ID;
-    public GameObject prefab;
     public string Title;
     public string Description;
 }

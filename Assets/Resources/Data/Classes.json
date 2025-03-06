@@ -1,0 +1,70 @@
+{
+    "Title":"Классы",
+    "Description": "Класс отображает то, каким путем вы достигните цели. Будете ли вы убивать, или достигните компромисса, или же завалите кого-то в кровать, на это влияет ваш класс.",
+    "Classes": [{
+        "Name": "Бард",
+        "Description": "нул",
+        "MainCharacteristic": "Харизма"
+    },
+    {
+        "Name": "Варвар",
+        "Description": "нул",
+        "MainCharacteristic": "Сила"
+    },
+    {
+        "Name": "Воин",
+        "Description": "нул",
+        "MainCharacteristic": "Сила"
+    },
+    {
+        "Name": "Волшебник",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Друид",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Жрец",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Изобретатель",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Колдун",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Монах",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Паладин",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Плут",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Следопыт",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    },
+    {
+        "Name": "Чародей",
+        "Description": "нул",
+        "MainCharacteristic": ""
+    }
+]
+}

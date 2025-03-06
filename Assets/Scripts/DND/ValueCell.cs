@@ -25,7 +25,7 @@ public class ValueCell : ListCell
     {
         buttonIncrease.onClick.AddListener(IncreaseValues);
         buttonDecrease.onClick.AddListener(DecreaseValues);
-        player = FindAnyObjectByType<Player>();
+        player = FindAnyObjectByType<PlayerMove>();
 
         listManager = ServiceLocator.Instance.Get<UIManager>().listManager;
         listManager.AddValueCell(this);

@@ -1,42 +1,58 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour, IService, IDispose
 {
-    private EventBus bus;
-    private SeedGenerator generator;
-    private SaveManager saveManager;
-    public GameState GameState { get; private set; } = GameState.On_UI;
-    public TurnManager turnManager {  get; private set; }
-    [SerializeField] private MusicMan musicManager;
-    public Player player { get; private set; }
-   
-    public int pointsInGame;
-    public int Score { get; private set; } = 0;
+    private Func<EventBus> bus;
+    private Func<SaveManager> saveManager;
+    private GameState GameState = GameState.On_UI;
+    private TurnManager turnManager;
+    private int pointsInGame;
+    private Func<BottlesManager> bottlesManager;
 
-    public void Init(EventBus eventBus, Player player, SaveManager save)
+    private Player player;
+    private Enemy enemy;
+    public void Init(Func<EventBus> eventBus, Func<SaveManager> saveManager, Func<BottlesManager> bottlesManager)
     {
-        generator = new SeedGenerator();
         turnManager = new TurnManager();
-        generator.Generate();
 
         bus = eventBus;
+        this.saveManager = saveManager;
+        this.bottlesManager = bottlesManager;
 
-        this.player = player;
-        saveManager = save;
+        turnManager.Init();
+        SetGameState(GameState);
 
-        turnManager.Init(bus);
-        musicManager.Init(this.player.transform);  
+        player = FindAnyObjectByType<Player>();
+        enemy = FindAnyObjectByType<Enemy>();
     }
 
     private void Start()
     {
-        bus.Subscribe<IntermediateSignal>(SetTurn);
-        bus.Subscribe<WhenDeadSignal>(CheckSavethrows);
-        bus.Subscribe<WhenDeadSignal>(SetAlive);
-        bus.Subscribe<DeathSignal>(x => SetGameState(GameState.On_UI));
-        bus.Subscribe<UnsubscibeSignal>(Dispose);
+        //bus.Subscribe<IntermediateSignal>(SetTurn);
+        //bus.Subscribe<WhenDeadSignal>(CheckSavethrows);
+        //bus.Subscribe<WhenDeadSignal>(SetAlive);
+        bus().Subscribe<DeathSignal>(x => SetGameState(GameState.On_UI));
+        bus().Subscribe<UnsubscibeSignal>(Dispose);
+        bus().Subscribe<ChangeStateSignal>(ToGame);
+        bus().Subscribe<TavernSignal>(TavernTurn);
+
+        bus().Invoke(new EndBottlesSignal(bottlesManager().CountOfBottles));
+
+    }
+
+    public void TavernTurn(TavernSignal signal)
+    {
+        if (bottlesManager().BottlesExist.Count == 0)
+        {
+            bus().Invoke(new EndBottlesSignal(bottlesManager().CountOfBottles));
+            player.ResetAgree();
+            enemy.ResetAgree();
+            return;
+        }
+
+        if (player.isAgreed && !enemy.isAgreed) bottlesManager().UseBottle(player, enemy);
     }
 
     public void SetTurn(IntermediateSignal signal)
@@ -44,12 +60,12 @@ public class GameManager : MonoBehaviour, IService, IDispose
         switch (turnManager.ShowLastTurn())
         {
             case (int)TypeOfPerson.PLAYER:
-                bus.Invoke(new EnemyTurnSignal());
-                bus.Invoke(new StopUseSignal());
+                bus().Invoke(new EnemyTurnSignal());
+                bus().Invoke(new StopUseSignal());
                 break;
             case (int)TypeOfPerson.ENEMY:
-                bus.Invoke(new PlayerTurnSignal());
-                bus.Invoke(new StartUseSignal());
+                bus().Invoke(new PlayerTurnSignal());
+                bus().Invoke(new StartUseSignal());
                 break;
             case (int)TypeOfPerson.NONE:
                 Debug.Log("Todo");
@@ -57,42 +73,13 @@ public class GameManager : MonoBehaviour, IService, IDispose
         }
     }
 
-    public void SetAlive(WhenDeadSignal signal)
+    public void ToGame(ChangeStateSignal signal)
     {
-        signal.DNDPerson.SetHits(signal.DNDPerson.maxHit / 2);
-    }
-
-    public void CheckSavethrows(WhenDeadSignal signal)
-    {
-        switch ((signal.existsSavethrows, signal.Person))
+        if(GameState == GameState.On_UI)
         {
-            case (2,TypeOfPerson.PLAYER):
-                bus.Invoke(new DialogueSignal("Savethrow_2"));
-                break;
-            case (1, TypeOfPerson.PLAYER):
-                bus.Invoke(new DialogueSignal("Savethrow_1"));
-                break;
-            case (0, TypeOfPerson.PLAYER):
-                if(Score < pointsInGame) Score = pointsInGame;
-                bus.Invoke(new DeathSignal(Score, LevelPoints()));
-                saveManager.Save();
-                saveManager.SavePoints(LevelPoints());
-                saveManager.Save(Score);
-                bus.Invoke(new DialogueSignal("Savethrow_1"));
-                break;
-
-            case (1, TypeOfPerson.ENEMY):
-                bus.Invoke(new DialogueSignal("Savethrow_2"));
-                break;
-            case (0, TypeOfPerson.ENEMY):
-                bus.Invoke(new DialogueSignal("Savethrow_1"));
-                break;
-
-            default:
-                bus.Invoke(new DialogueSignal("Savethrow_default"));
-                break;
+            SetGameState(GameState.On_Game);
         }
-    }
+    } 
 
     public void SetGameState(GameState gameState)
     {
@@ -101,23 +88,21 @@ public class GameManager : MonoBehaviour, IService, IDispose
         switch (GameState)
         {
             case GameState.On_UI:
-                bus.Invoke(new OnUISignal());
-                bus.Invoke(new StopPlaySignal());
-                bus.Invoke(new StopUseSignal());
+                bus().Invoke(new OnUISignal());
+                bus().Invoke(new StopPlaySignal());
+                bus().Invoke(new StopUseSignal());
                 break;
             case GameState.On_Game:
-                bus.Invoke(new OffUISignal());
-                bus.Invoke(new StartPlaySignal());
-                bus.Invoke(new StartUseSignal());
+                bus().Invoke(new OffUISignal());
+                bus().Invoke(new StartPlaySignal());
+                bus().Invoke(new StartUseSignal());
                 break;
             case GameState.On_Pause:
-                bus.Invoke(new OnUISignal());
-                bus.Invoke(new StopPlaySignal());
-                bus.Invoke(new StopUseSignal());
+                bus().Invoke(new OnUISignal());
+                bus().Invoke(new StopPlaySignal());
+                bus().Invoke(new StopUseSignal());
                 break;
         }
-
-        Debug.Log("Im tired boss " + GameState.ToString());
     }
 
     public int LevelPoints()
@@ -126,20 +111,13 @@ public class GameManager : MonoBehaviour, IService, IDispose
         return pointsInGame / result;
     }
 
-    public void Exit()
-    {
-        Application.Quit();
-    }
-
-    public void LoadLevel(int level)
-    {
-        SceneManager.LoadScene(level);
-    }
-
     public void Dispose(UnsubscibeSignal signal)
     {
-        bus.Unsubscribe<IntermediateSignal>(SetTurn);
+        bus().Unsubscribe<IntermediateSignal>(SetTurn);
     }
+
+    public void UpdatePoints(int value) => pointsInGame += value;
+    public void AddTurn(int value) => turnManager.AddTurn(value);
 }
 
 public enum GameState

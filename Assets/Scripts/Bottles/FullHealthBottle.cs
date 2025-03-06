@@ -1,28 +1,28 @@
 
 public class FullHealthBottle : CommonBottle
 {
-    public void StandardEffect(DNDPerson person)
+    public void StandardEffect(DNDManipulator person)
     {
-        person.SetHits(person.maxHit);
-        person.PlusLevelOfStress(person.maxHit * 2);
+        person.SetHits(person.person.maxHit);
+        person.PlusLevelOfStress(person.person.maxHit * 2);
     }
 
-    public override void TakeEffect(DNDPerson person)
+    public override void TakeEffect(DNDManipulator person)
     {
         base.TakeEffect(person);
         StandardEffect(person);   
     }
 
-    public override void TakeEffect(Enemy enemy)
-    {
-        base.TakeEffect(enemy);
-        StandardEffect(enemy);
-    }
-
-    public override void TakeEffect(Player player)
+    public override void SetEffect(Player player)
     {
         base.TakeEffect(player);
-        StandardEffect(player);
-        eventBus.Invoke(new HealSignal(player.maxHit, player.typeOfPerson));
+        StandardEffect(player.dndManipulator);
+        eventBus.Invoke(new HealSignal());
+    }
+
+    public override void SetEffect(Enemy enemy)
+    {
+        base.TakeEffect(enemy);
+        StandardEffect(enemy.manipulator);
     }
 }

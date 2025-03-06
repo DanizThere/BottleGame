@@ -3,12 +3,12 @@ using UnityEngine;
 public class WhenDeadSignal : ISignal
 {
     public TypeOfPerson Person;
-    public DNDPerson DNDPerson;
+    public DNDManipulator DNDPerson;
     public int existsSavethrows;
 
-    public WhenDeadSignal(DNDPerson person, int existsSavethrows)
+    public WhenDeadSignal(DNDManipulator person, int existsSavethrows)
     {
-        Person = person.typeOfPerson;
+        Person = person.person.typeOfPerson;
         DNDPerson = person;
         this.existsSavethrows = existsSavethrows;
     }

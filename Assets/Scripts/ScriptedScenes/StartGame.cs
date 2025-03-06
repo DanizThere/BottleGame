@@ -2,15 +2,22 @@ using UnityEngine;
 
 public class StartGame : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private DialogueManager dialogueManager;
+    private PlayerMove playerMove;
+    private EventBus eventBus;
+    [SerializeField] private Transform[] dots;
+    private void Start()
     {
-        
+        dialogueManager = ServiceLocator.Instance.Get<DialogueManager>();
+        eventBus = ServiceLocator.Instance.Get<EventBus>();
+        playerMove = FindAnyObjectByType<PlayerMove>();
+        Cutscene();
     }
 
-    // Update is called once per frame
-    void Update()
+    private async Awaitable Cutscene()
     {
-        
+        await Awaitable.WaitForSecondsAsync(1f);
+        eventBus.Invoke(new DialogueSignal("1_security_start_1"));
+
     }
 }

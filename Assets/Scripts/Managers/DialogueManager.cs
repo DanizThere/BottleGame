@@ -7,16 +7,16 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
 {
     private Dictionary<string, SimpleSentence> sentences = new Dictionary<string, SimpleSentence>();
     private EventBus eventBus;
+    private Player player;
     private TextWriting textWriting;
-    private Transform player;
     private CancellationTokenSource token = new CancellationTokenSource();
 
     [SerializeField] private SimpleSentence[] sentencesPrefab;
     
-    public void Init(Transform player, TextWriting txtWriting, EventBus bus)
+    public void Init(TextWriting txtWriting)
     {
-        this.player = player;
-        eventBus = bus;
+        eventBus = ServiceLocator.Instance.Get<EventBus>();
+        player = FindAnyObjectByType<Player>();
         textWriting = txtWriting;
 
         eventBus.Subscribe<DialogueSignal>(StartDialogue, 1);
@@ -25,13 +25,6 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
         foreach (var sentence in sentencesPrefab)
         {
             Add(sentence);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            CancelString();
         }
     }
 
@@ -71,7 +64,7 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
             return;
         }
 
-        await sentences[signal.Key].StartType(ResetToken().Token, eventBus, textWriting, player);
+        await sentences[signal.Key].StartType(ResetToken().Token, eventBus, textWriting, player.transform);
     }
 
     public void CancelString()

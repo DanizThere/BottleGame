@@ -1,10 +1,7 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ServiceLocatorLoader : MonoBehaviour
 {
-    //создание Синглтона
     [SerializeField] private GameManager gameManager;
     [SerializeField] private SoundManager soundManager;
     [SerializeField] private DialogueManager dialogueManager;
@@ -13,6 +10,8 @@ public class ServiceLocatorLoader : MonoBehaviour
     [SerializeField] private SaveManager saveManager;
     [SerializeField] private UIManager uiManager;
     [SerializeField] private SettingManager settingManager;
+    [SerializeField] private MusicMan musicManager;
+    [SerializeField] private DataLoader dataLoader;
 
     [SerializeField] private ListManager listManager;
 
@@ -35,17 +34,15 @@ public class ServiceLocatorLoader : MonoBehaviour
         ServiceLocator.Instance.Register<UIManager>(uiManager);
         ServiceLocator.Instance.Register<BottlesManager>(bottlesManager);
         ServiceLocator.Instance.Register<SettingManager>(settingManager);
+        ServiceLocator.Instance.Register<DataLoader>(dataLoader);
 
-        gameManager.Init(eventBus, player, saveManager);
+        dataLoader.Init();
         saveManager.Init(player);
         soundManager.Init(resourcePath);
-        bottlesManager.Init(soundManager, eventBus);
-        uiManager.Init(player, listManager, dialogueManager, saveManager, eventBus);
-    }
-
-    private void Start()
-    {
-        
+        musicManager.Init();
+        bottlesManager.Init(() => soundManager, () => eventBus);
+        gameManager.Init(() => eventBus,() => saveManager, () => bottlesManager);
+        uiManager.Init(listManager, () => eventBus, () => saveManager, () => dialogueManager);
     }
 }
 

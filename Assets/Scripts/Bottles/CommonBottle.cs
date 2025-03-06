@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class CommonBottle : MonoBehaviour
@@ -7,13 +6,15 @@ public class CommonBottle : MonoBehaviour
     public float weight = .1f;
     public int Points = 10;
 
-    protected ServiceLocator serviceLocator;
     protected EventBus eventBus;
+    private GameManager gameManager;
+    private BottlesManager bottlesManager;
 
     private void Start()
     {
-        serviceLocator = ServiceLocator.Instance;
-        eventBus = serviceLocator.Get<EventBus>();
+        eventBus = ServiceLocator.Instance.Get<EventBus>();
+        gameManager = ServiceLocator.Instance.Get<GameManager>();
+        bottlesManager = ServiceLocator.Instance.Get<BottlesManager>();
     }
 
     private void Awake()
@@ -21,24 +22,37 @@ public class CommonBottle : MonoBehaviour
         gameObject.name = $"{GetType()}";
     }
 
-    public virtual void TakeEffect(DNDPerson person)
+    public virtual void TakeEffect(DNDManipulator person)
     {
-        serviceLocator.Get<BottlesManager>().ReleaseBottle(this);
-        eventBus.Invoke(new IntermediateSignal());
+        gameManager.AddTurn(person.person.turnValue);
+
+        eventBus.Invoke(new TavernSignal());
     }
 
     public virtual void TakeEffect(Player player)
     {
-        serviceLocator.Get<GameManager>().pointsInGame += Points;
-        serviceLocator.Get<GameManager>().turnManager.AddTurn(player.turnValue);
-        serviceLocator.Get<BottlesManager>().ReleaseBottle(this);
-        eventBus.Invoke(new IntermediateSignal());
+        bottlesManager.HandlePlayerChoise(this);
+        //gameManager.AddTurn(player.dndManipulator.person.turnValue);
+        player.HandleAgree();
+
+        eventBus.Invoke(new TavernSignal());
     }
 
     public virtual void TakeEffect(Enemy enemy)
     {
-        serviceLocator.Get<BottlesManager>().ReleaseBottle(this);
-        serviceLocator.Get<GameManager>().turnManager.AddTurn(enemy.turnValue);
-        eventBus.Invoke(new IntermediateSignal());
+        //gameManager.AddTurn(enemy.manipulator.person.turnValue);
+        enemy.HandleAgree();
+        bottlesManager.HandleEnemyChoise(this);
+
+        eventBus.Invoke(new TavernSignal());
+    }
+
+    public virtual void SetEffect(Player player)
+    {
+        gameManager.UpdatePoints(Points);
+    }
+    public virtual void SetEffect(Enemy enemy)
+    {
+        Debug.Log("yappie");
     }
 }

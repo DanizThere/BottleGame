@@ -27,13 +27,13 @@ public class HUD : MonoBehaviour, IDispose
     public async void HealAction(HealSignal signal)
     {
         Heal.SetActive(true);
-        await Task.Delay(TimeSpan.FromSeconds(.5f));
+        await Awaitable.WaitForSecondsAsync(.5f);
         Heal.SetActive(false);
     }
     public async void DamageAction(DamageSignal signal)
     {
         Damage.SetActive(true);
-        await Task.Delay(TimeSpan.FromSeconds(.5f));
+        await Awaitable.WaitForSecondsAsync(.5f);
         Damage.SetActive(false);
     }
 

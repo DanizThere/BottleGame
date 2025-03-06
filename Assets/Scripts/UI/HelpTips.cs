@@ -16,8 +16,6 @@ public class HelpTips : MonoBehaviour
         tipScr = tip.GetComponent<Tip>();
         info = tip.gameObject.transform.GetChild(0).GetComponentInChildren<TMPro.TMP_Text>();
         nameOfInteract = tip.gameObject.transform.GetChild(1).GetComponentInChildren<TMPro.TMP_Text>();
-        Debug.Log(info.gameObject.name);
-        Debug.Log(nameOfInteract.gameObject.name);
         tip.SetActive(false);
         cam = Camera.main.GetComponent<CameraMove>();
     }

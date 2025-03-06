@@ -220,8 +220,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9d2a2352b6bef142a46b87c62fe1d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicManager: {fileID: 0}
-  pointsInGame: 0
 --- !u!114 &8214917000802979022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,7 +258,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4489360487425399369}
-  - component: {fileID: 2069496352127084262}
+  - component: {fileID: 1894850076821178440}
   m_Layer: 0
   m_Name: SaveManager
   m_TagString: Untagged
@@ -283,7 +281,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2273517729067966966}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2069496352127084262
+--- !u!114 &1894850076821178440
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -305,6 +303,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1434918123361350225}
   - component: {fileID: 2879347291960169038}
+  - component: {fileID: 3522281965342939486}
   m_Layer: 0
   m_Name: SoundManager
   m_TagString: Untagged
@@ -339,6 +338,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38963544d5da1e744a59baa349957a8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3522281965342939486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3502382363331167710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afc040adc10701d489dfc6c63ad2d685, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioMixer: {fileID: 24100000, guid: 21f0a80d3c1c33b4887ea7d7c3c77301, type: 2}
 --- !u!1 &5049918078487557574
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,6 +399,16 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &5935946309565502350
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,7 +425,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5105842150680185168
 Transform:
   m_ObjectHideFlags: 0
@@ -426,7 +448,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5935946309565502350}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 53a8110889b4d5245818da85505158e0, type: 3}
   m_Name: 

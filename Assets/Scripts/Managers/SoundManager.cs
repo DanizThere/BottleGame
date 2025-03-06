@@ -25,7 +25,7 @@ public class SoundManager : MonoBehaviour, IService
         float clipLength = audioSource.audioSource.clip.length;
         audioSource.audioSource.Play();
 
-        await Task.Delay(System.TimeSpan.FromSeconds(clipLength)); //задержка, чтобы объект не сразу заносился в пул
+        await Awaitable.WaitForSecondsAsync(clipLength); //задержка, чтобы объект не сразу заносился в пул
         audioPrefab.Release(audioSource);
     }
 
@@ -44,12 +44,12 @@ public class SoundManager : MonoBehaviour, IService
             audioSource.audioSource.Stop();
         });
 
-        await Task.Delay(System.TimeSpan.FromSeconds(clipLength)); //задержка, чтобы объект не сразу заносился в пул
+        await Awaitable.WaitForSecondsAsync(clipLength); //задержка, чтобы объект не сразу заносился в пул
         audioPrefab.Release(audioSource);
     }
 
     //Все тоже самое, только случайный звук
-    public async Task PlaySoundRandom(AudioClip[] clip, Transform spawnTransform, float volume)
+    public async Awaitable PlaySoundRandom(AudioClip[] clip, Transform spawnTransform, float volume)
     {
         int random = Random.Range(0, clip.Length);
         var audioSource = audioPrefab.Get();
@@ -59,7 +59,7 @@ public class SoundManager : MonoBehaviour, IService
         float clipLength = audioSource.audioSource.clip.length;
         audioSource.audioSource.Play();
 
-        await Task.Delay(System.TimeSpan.FromSeconds(clipLength));
+        await Awaitable.WaitForSecondsAsync(clipLength);
         audioPrefab.Release(audioSource);
     }
 

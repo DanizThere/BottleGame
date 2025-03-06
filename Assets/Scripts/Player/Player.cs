@@ -1,137 +1,55 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
-public class Player : DNDPerson, IPlayerInput, IAction, IDispose
+public class Player : MonoBehaviour, IPlayerInput, IDispose, IEntity
 {
     private CameraMove cam;
-    private CameraHandle cameraHandle;
     private Camera cams;
-    private GameManager gameManager;
+    private EventBus eventBus;
+    private Backpack backpack;
+    private PlayerMove playerMove;
+    private Mob mob;
+    public DNDManipulator dndManipulator { get; private set; }
 
-    public bool canUse;
-    private bool handleAction;
-    private Quaternion originalQuaternion;
-    private Vector3 originalVector;
+    public bool canUse { get; private set; }
+    public bool isAgreed = false;
+
     [SerializeField] private Transform orientation;
+    [SerializeField] private DNDPerson person;
+    [SerializeField] private DNDClasses classes;
 
-    private CancellationTokenSource CancellationTokenSource;
-    private CancellationToken CancellationToken;
     private void Awake()
     {
-        originalQuaternion = Quaternion.Euler(0,0,0);
-        originalVector = transform.position;
-
-        personClass = GetComponent<DNDClasses>();
         cams = Camera.main;
         cam = cams.GetComponent<CameraMove>();
-        cameraHandle = FindAnyObjectByType<CameraHandle>();
 
-        PersonInit(1.1f, personClass, TypeOfPerson.PLAYER, 100, 1, 8, 8, 8, 8, 8, 8, "Без имени");
-
-        CancellationTokenSource = new CancellationTokenSource();
-        CancellationToken = CancellationTokenSource.Token;
+        dndManipulator = new DNDManipulator()
+            .SetPerson(person)
+            .InitCharacteristics(8, 8, 8, 8, 8, 8)
+            .SetName("No name")
+            .SetClasses(classes)
+            .SetsStartHits(person.characteristics["Dexterity"][1])
+            .SetTurnValue((int)TypeOfPerson.PLAYER);
     }
 
     private void Start()
     {
         eventBus = ServiceLocator.Instance.Get<EventBus>();
-        gameManager = ServiceLocator.Instance.Get<GameManager>();
 
         eventBus.Subscribe<StartUseSignal>(SetUseTrue);
         eventBus.Subscribe<StopUseSignal>(SetUseFalse);
         eventBus.Subscribe<UnsubscibeSignal>(Dispose);
-
     }
 
-    public void SetUseTrue(StartUseSignal signal)
-    {
-        canUse = true;
-    }
-
-    public void SetUseFalse(StopUseSignal signal) { canUse = false; }
+    public void SetUseTrue(StartUseSignal signal) => canUse = true;
+    public void SetUseFalse(StopUseSignal signal) => canUse = false;
 
     public void Dispose(UnsubscibeSignal signal)
     {
     }
 
-    public override void CheckHP()
-    {
-        if(hits <= 0)
-        {
-            savethrowsFromDeath--;
-            eventBus.Invoke(new WhenDeadSignal(this, savethrowsFromDeath));
-        }
-    }
-
-    public override bool CanBelief()
-    {
-        return true;
-    }
-
-    public async Task Flow(Vector3 destination,Quaternion rotation)
-    {
-        if (transform.position == destination)
-        {
-            Debug.Log(destination);
-            CancelToken();
-        }
-
-        Vector3 formerPos = transform.position;
-
-        await DoFlow(formerPos, destination, rotation, CancellationToken);
-
-        orientation.rotation = rotation;
-        transform.position = destination;
-    }
-
-    private async Task DoFlow(Vector3 origPos, Vector3 destination, Quaternion rotation, CancellationToken token)
-    {
-        token.Register(() =>
-        {
-            return;
-        });
-        orientation.rotation = rotation;
-        for (float t = 0; t < 1f; t += Time.deltaTime)
-        {
-            if(token.IsCancellationRequested)
-            {
-                transform.position = destination;
-                break;
-            }
-            cameraHandle.HandleRotate(orientation, t * 10);
-            transform.position = Vector3.MoveTowards(origPos, destination, t * 10);
-
-            await Task.Delay(TimeSpan.FromSeconds(.001f));
-        }
-    }
-
-    public async Task FlowToFormerPos()
-    {
-        if (transform.position == originalVector) { 
-            CancelToken();
-            orientation.rotation = originalQuaternion;
-        }
-
-        Vector3 formerPos = transform.position;
-
-        for (float t = 0; t < 1f; t += Time.deltaTime)
-        {
-            cameraHandle.HandleRotate(transform, t * 10);
-            transform.position = Vector3.MoveTowards(transform.position, originalVector, t * 10);
-
-            await Task.Delay(TimeSpan.FromSeconds(.001f));
-        }
-    }
-
-    private void CancelToken()
-    {
-        CancellationTokenSource.Cancel();
-
-        CancellationTokenSource = new CancellationTokenSource();
-        CancellationToken = CancellationTokenSource.Token;
-    }
+    public void SetBackpack(Backpack backpack) => this.backpack = backpack;
 
     public void Act()
     {
@@ -141,19 +59,20 @@ public class Player : DNDPerson, IPlayerInput, IAction, IDispose
         if (Physics.Raycast(cam.MouseOnWorldScreen(), out hit))
         {
             var bottle = hit.collider.GetComponent<CommonBottle>();
-            var characterList = hit.collider.GetComponent<CharacterList>();
-            var cell = hit.collider.GetComponent<ListCell>();
+            var interactable = hit.collider.GetComponent<IInteractable>();
+            var itemObject = hit.collider.GetComponent<ItemObject>();
             if (bottle != null)
             {
                 bottle.TakeEffect(this);
             }
-            if (characterList != null)
+            if (interactable != null)
             {
-                Use(characterList);
+                Use(interactable);
             }
-            if (cell != null)
+            if(itemObject != null)
             {
-                Use(cell);
+                backpack.inventorySystem.Add(itemObject);
+                backpack.ShowInventory();
             }
             Debug.Log(hit.collider.gameObject.name);
         }
@@ -166,25 +85,25 @@ public class Player : DNDPerson, IPlayerInput, IAction, IDispose
 
     public void Cancel()
     {
-        if (gameManager.GameState == GameState.On_UI)
-        {
-            ServiceLocator.Instance.Get<GameManager>().SetGameState(GameState.On_Game);
-            FlowToFormerPos();
-            ServiceLocator.Instance.Get<UIManager>().listManager.DisableAllButtonsInList();
-        }
-
+        eventBus.Invoke(new ChangeStateSignal());
     }
 
-    public void TryBelief(DNDPerson person, CommonBottle bottle)
+    public void SetMob(Mob mob) => this.mob = mob;
+
+    public void HandleAgree()
     {
-        if (person.CanBelief())
-        {
-            if (person.characteristics["Charisma"][1] > UnityEngine.Random.Range(0, (int)Dices.D20))
-            {
-                bottle.TakeEffect(person);
-                person.PlusLevelOfStress(30);
-            }
-            return;
-        }
+        eventBus.Invoke(new StopPlaySignal());
+        eventBus.Invoke(new StopUseSignal());
+        Debug.Log(isAgreed + " player");
+        isAgreed = true;
     }
+
+    public void ResetAgree()
+    {
+        eventBus.Invoke(new StartPlaySignal());
+        eventBus.Invoke(new StartUseSignal());
+
+        isAgreed = false;
+    }
+
 }

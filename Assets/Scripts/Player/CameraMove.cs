@@ -5,7 +5,7 @@ public class CameraMove : MonoBehaviour, IMoveable, IDispose
 {
     private InputManager inputManager;
     private EventBus eventBus;
-    private DNDPerson player;
+    private Player player;
     public float minRotY = -45f, maxRotY = 45f;
     public float minRotX = -90f, maxRotX = 90f;
     [SerializeField] private Transform orientation; 
