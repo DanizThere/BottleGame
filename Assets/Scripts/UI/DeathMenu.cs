@@ -15,13 +15,23 @@ public class DeathMenu : MonoBehaviour
     private DNDClasses playerClass;
     private int points;
     private Func<SaveManager> saveManager;
+    private Func<GameManager> gameManager;
 
-    public void Init(DNDClasses playerClass, Func<SaveManager> saveMan)
+    public void Init(DNDClasses playerClass, Func<SaveManager> saveMan, Func<GameManager> gameManager)
     {
+        this.gameManager = gameManager;
         this.playerClass = playerClass;
         saveManager = saveMan;
         points = saveManager().LoadPoints();
     }
+
+    //private void OnEnable()
+    //{
+    //    int points = gameManager().LevelPoints();
+    //    int score = gameManager().pointsInGame;
+
+    //    ShowInfo(score, points);
+    //}
 
     private void Start()
     {
@@ -43,16 +53,22 @@ public class DeathMenu : MonoBehaviour
 
     public void Restart()
     {
-        ServiceLocator.Instance.Get<EventBus>().Invoke(new UnsubscibeSignal());
-
         int currentScene = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentScene);
     }
 
-    public async void ShowInfo(DeathSignal signal)
+    public void ShowDeadMenu()
     {
-        await CurrentScore(signal.Score);
-        await UpdatePoints(signal.Points);
+        int points = gameManager().LevelPoints();
+        int score = gameManager().PointsInGame;
+
+        ShowInfo(score, points);
+    }
+
+    public async void ShowInfo(int score, int points)
+    {
+        await CurrentScore(score);
+        await UpdatePoints(points);
 
         buttonsGO.SetActive(true);
     }

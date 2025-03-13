@@ -15,20 +15,13 @@ public class CharacterList : MonoBehaviour, IInteractable
     [SerializeField] private TMPro.TMP_Text characteristicCharisma;
     #endregion
 
-    private EventBus eventBus;
-
-    private void Start()
-    {
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
-    }
 
     public void Init(DNDPerson person)
     {
-        this.Savethrows.text = person.savethrowsFromDeath.ToString();  
+        Debug.Log("Good luck");
     }
 
     public void Interact()
     {
-        eventBus.Invoke(new ListSignal());
     }
 }

@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InputManager : MonoBehaviour, IDispose
+public class InputManager : MonoBehaviour
 {
     private InputSystem_Actions action;
     public Vector2 CameraInput;
     private IPlayerInput act;
-    private EventBus eventBus;
     private void Awake()
     {
         action = new InputSystem_Actions();
@@ -15,8 +14,6 @@ public class InputManager : MonoBehaviour, IDispose
     private void Start()
     {
         act = FindAnyObjectByType<Player>().GetComponent<IPlayerInput>();
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
     }
 
     private void OnEnable()
@@ -38,12 +35,6 @@ public class InputManager : MonoBehaviour, IDispose
         action.UI.Cancel.performed -= CancelPerformed;
         action.Player.Attack.performed -= InteractPerformed;
     }
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        
-    }
-
 
     private void InteractPerformed(InputAction.CallbackContext context)
     {

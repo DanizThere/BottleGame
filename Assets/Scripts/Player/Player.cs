@@ -2,51 +2,51 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class Player : MonoBehaviour, IPlayerInput, IDispose, IEntity
+public class Player : MonoBehaviour, IPlayerInput, IEntity
 {
     private CameraMove cam;
     private Camera cams;
-    private EventBus eventBus;
     private Backpack backpack;
     private PlayerMove playerMove;
     private Mob mob;
-    public DNDManipulator dndManipulator { get; private set; }
+    private GameManager gameManager;
+    private DNDManipulator dndManipulator;
+    private DNDPerson person;
 
-    public bool canUse { get; private set; }
-    public bool isAgreed = false;
+    private bool canUse;
+    private bool isAgreed = false;
 
     [SerializeField] private Transform orientation;
-    [SerializeField] private DNDPerson person;
     [SerializeField] private DNDClasses classes;
+
+    public DNDPerson Person => person;
+    private bool CanUse => canUse;
+    public bool IsAgreed => isAgreed;
+    public DNDManipulator Manipulator => dndManipulator;
 
     private void Awake()
     {
         cams = Camera.main;
         cam = cams.GetComponent<CameraMove>();
 
+        person = new DNDPerson()
+            .SetName("No name")
+            .InitCharacteristics(8,8,8,8,8,8)
+            .SetTurnValue(person.turnValue);
+
         dndManipulator = new DNDManipulator()
             .SetPerson(person)
-            .InitCharacteristics(8, 8, 8, 8, 8, 8)
-            .SetName("No name")
             .SetClasses(classes)
-            .SetsStartHits(person.characteristics["Dexterity"][1])
-            .SetTurnValue((int)TypeOfPerson.PLAYER);
+            .SetsStartHits(person.dexterity.Value);
     }
 
     private void Start()
     {
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
+        gameManager = ServiceLocator.Instance.Get<GameManager>();
 
-        eventBus.Subscribe<StartUseSignal>(SetUseTrue);
-        eventBus.Subscribe<StopUseSignal>(SetUseFalse);
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
-    }
-
-    public void SetUseTrue(StartUseSignal signal) => canUse = true;
-    public void SetUseFalse(StopUseSignal signal) => canUse = false;
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
+        gameManager.StartGame += () => canUse = true;
+        gameManager.OnSelected += () => canUse = false;
+        gameManager.OnDeath += () => canUse = false;
     }
 
     public void SetBackpack(Backpack backpack) => this.backpack = backpack;
@@ -85,25 +85,19 @@ public class Player : MonoBehaviour, IPlayerInput, IDispose, IEntity
 
     public void Cancel()
     {
-        eventBus.Invoke(new ChangeStateSignal());
+        
     }
 
     public void SetMob(Mob mob) => this.mob = mob;
 
     public void HandleAgree()
     {
-        eventBus.Invoke(new StopPlaySignal());
-        eventBus.Invoke(new StopUseSignal());
         Debug.Log(isAgreed + " player");
         isAgreed = true;
     }
 
     public void ResetAgree()
     {
-        eventBus.Invoke(new StartPlaySignal());
-        eventBus.Invoke(new StartUseSignal());
-
         isAgreed = false;
     }
-
 }

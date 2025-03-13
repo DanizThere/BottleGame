@@ -10,17 +10,14 @@ public class ServiceLocatorMainMenu : MonoBehaviour
     [SerializeField] private MusicMan musicManager;
     [SerializeField] private string SoundResourcePath;
 
-    private EventBus eventBus;
     private Player player;
 
     private void Awake()
     {
-        eventBus = new EventBus();
         player = FindAnyObjectByType<Player>();
 
         ServiceLocator.Initialize();
 
-        ServiceLocator.Instance.Register<EventBus>(eventBus);
         ServiceLocator.Instance.Register<SettingManager>(settingManager);
         ServiceLocator.Instance.Register<UIManager>(uiManager);
         ServiceLocator.Instance.Register<SoundManager>(soundManager);
@@ -32,7 +29,7 @@ public class ServiceLocatorMainMenu : MonoBehaviour
     {
         saveManager.Init(player);
         soundManager.Init(SoundResourcePath);
-        uiManager.Init(null, () => eventBus, () => saveManager, () => dialogueManager);
+        uiManager.Init(() => saveManager, () => dialogueManager);
         musicManager.Init();
     }
 }

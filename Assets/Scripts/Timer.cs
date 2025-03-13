@@ -4,12 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class Timer : MonoBehaviour, IDispose
+public class Timer : MonoBehaviour
 {
     public float deltaTimer = 15;
     public float timer { get; private set; }
     private bool canCount;
-    private EventBus eventBus;
     private CancellationTokenSource token;
     private SoundManager soundManager;
     [SerializeField] private AudioClip[] clockTick;
@@ -21,14 +20,13 @@ public class Timer : MonoBehaviour, IDispose
 
     private void Start()
     {
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
         soundManager = ServiceLocator.Instance.Get<SoundManager>();
 
-        eventBus.Subscribe<IntermediateSignal>(CancelTimer<IntermediateSignal>, 3);
-        eventBus.Subscribe<DeathSignal>(StopTimer,0);
-        eventBus.Subscribe<IntermediateSignal>(ResetToken, 2);
-        eventBus.Subscribe<IntermediateSignal>(TurnTimer, 1);
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
+        //eventBus.Subscribe<IntermediateSignal>(CancelTimer<IntermediateSignal>, 3);
+        //eventBus.Subscribe<DeathSignal>(StopTimer,0);
+        //eventBus.Subscribe<IntermediateSignal>(ResetToken, 2);
+        //eventBus.Subscribe<IntermediateSignal>(TurnTimer, 1);
+        //eventBus.Subscribe<UnsubscibeSignal>(Dispose); заменить
 
         canCount = true;
     }
@@ -38,7 +36,7 @@ public class Timer : MonoBehaviour, IDispose
         timer = deltaTimer;
     }
 
-    public void ResetToken(IntermediateSignal signal)
+    public void ResetToken()
     {
         token.Dispose();
         token = new CancellationTokenSource();
@@ -49,15 +47,15 @@ public class Timer : MonoBehaviour, IDispose
         deltaTimer = time;
     }
 
-    public void TurnTimer(IntermediateSignal signal)
+    public void TurnTimer()
     {
         ResetTimer();
-        WorkTimer(signal, token.Token);
+        WorkTimer(token.Token);
     }
 
 
     //todo: переписать таймер, чтобы он начинался исключительно в момент наступления хода
-    private async Awaitable WorkTimer(IntermediateSignal signal, CancellationToken token)
+    private async Awaitable WorkTimer(CancellationToken token)
     {
         if (!canCount) return;
         do
@@ -67,7 +65,6 @@ public class Timer : MonoBehaviour, IDispose
                 break;
             }
             soundManager.PlaySoundRandom(clockTick, transform, .5f);
-            eventBus.Invoke(new DisplayTimeSignal(timer));
             timer--;
             await Awaitable.WaitForSecondsAsync(1);
         }
@@ -90,21 +87,15 @@ public class Timer : MonoBehaviour, IDispose
         //}
     }
 
-    private void CancelTimer<T>(T signal) where T : ISignal
+    private void CancelTimer()
     {
         token.Cancel();
     }
 
-    private void StopTimer(DeathSignal signal) { 
+    private void StopTimer() 
+    { 
         token.Cancel();
-        canCount = false; }
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        token.Cancel();
-
-        eventBus.Unsubscribe<IntermediateSignal>(TurnTimer);
-        eventBus.Unsubscribe<IntermediateSignal>(ResetToken);
-        eventBus.Unsubscribe<IntermediateSignal>(CancelTimer<IntermediateSignal>);
+        canCount = false; 
     }
+
 }

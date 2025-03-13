@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class DNDManipulator
@@ -5,17 +6,7 @@ public class DNDManipulator
     public DNDPerson person {  get; private set; }
     public DNDClasses classes { get; private set; }
 
-    public DNDManipulator InitCharacteristics(int characteristicStrength, int characteristicDexterity, int characteristicConstitution, int characteristicIntelligence, int characteristicWisdom, int characteristicCharisma)
-    {
-        person.characteristics.Add("Strength", new int[] { characteristicStrength, SetValue(characteristicStrength) });
-        person.characteristics.Add("Dexterity", new int[] { characteristicDexterity, SetValue(characteristicDexterity) });
-        person.characteristics.Add("Constitution", new int[] { characteristicConstitution, SetValue(characteristicConstitution) });
-        person.characteristics.Add("Intelligence", new int[] { characteristicIntelligence, SetValue(characteristicIntelligence) });
-        person.characteristics.Add("Wisdom", new int[] { characteristicWisdom, SetValue(characteristicWisdom) });
-        person.characteristics.Add("Charisma", new int[] { characteristicCharisma, SetValue(characteristicCharisma) });
-
-        return this;
-    }
+    public event Action HealthChanged;
 
     public DNDManipulator SetPerson(DNDPerson person)
     {
@@ -31,13 +22,6 @@ public class DNDManipulator
         return this;
     }
 
-    public DNDManipulator SetName(string name)
-    {
-        person.personName = name;
-
-        return this;
-    }
-
     public DNDManipulator SetsStartHits(int value)
     {
         person.maxHit = SetStartHits(value);
@@ -45,24 +29,6 @@ public class DNDManipulator
 
         return this;
     }
-
-    public DNDManipulator SetTurnValue(int turnValue)
-    {
-        person.turnValue = turnValue;
-
-        return this;
-    }
-
-    public int SetValue(int characteristic)
-    {
-        if (characteristic == 1)
-        {
-            return -5;
-        }
-        return characteristic / 2 - 5;
-    }
-
-    
 
     public void TakeDamage(int value)
     {
@@ -77,6 +43,8 @@ public class DNDManipulator
             person.hits -= halfHits;
         }
         else person.hits -= value;
+
+        HealthChanged?.Invoke();
     }
 
     public void TakeHeal(int value)
@@ -111,7 +79,7 @@ public class DNDManipulator
         int hits = (int)classes.scriptableClasses.diceOfHits + value;
         for (int i = 1; i < classes.classLevel; i++)
         {
-            hits += Random.Range(0, (int)classes.scriptableClasses.diceOfHits) + value;
+            hits += UnityEngine.Random.Range(0, (int)classes.scriptableClasses.diceOfHits) + value;
         }
         return hits;
     }
@@ -130,28 +98,7 @@ public class DNDManipulator
     {
         if (person.hits <= 0)
         {
-            ServiceLocator.Instance.Get<EventBus>().Invoke(new WhenDeadSignal(this, person.savethrowsFromDeath));
             person.savethrowsFromDeath--;
         }
-    }
-
-    public int GetCharacteristicValue(string key)
-    {
-        int[] value = new int[2];
-        if(person.characteristics.TryGetValue(key, out value))
-        {
-            return value[1];
-        }
-        return 0;
-    }
-
-    public int GetCharacteristic(string key)
-    {
-        int[] value = new int[2];
-        if (person.characteristics.TryGetValue(key, out value))
-        {
-            return value[0];
-        }
-        return 0;
     }
 }

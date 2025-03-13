@@ -3,34 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BottlesManager : MonoBehaviour, IService, IDispose
+public class BottlesManager : MonoBehaviour, IService
 {
     private Dictionary<float, PoolObject<CommonBottle>> bottlesPool = new Dictionary<float, PoolObject<CommonBottle>>();
     [Header("Bottles Prefab")]
-    [SerializeField] private GameObject[] bottles;
+    [SerializeField] private List<GameObject> bottles = new List<GameObject>();
     public List<CommonBottle> BottlesExist = new List<CommonBottle>();
     public int CountOfBottles = 5;
 
-    private Func<EventBus> eventBus;
     private Func<SoundManager> soundManager;
+    private Func<GameManager> gameManager;
     [SerializeField] private AudioClip bottleUseSound;
 
     private CommonBottle playerChoise;
     private CommonBottle enemyChoise;
 
-    public void Init(Func<SoundManager> soundManager, Func<EventBus> eventBus)
+    private string CurrentBottles = null;
+
+    public event Action InstantiateBottles;
+    public event Action<string> ShowBottles;
+    public void Init(Func<SoundManager> soundManager, Func<GameManager> gameManager)
     {
         this.soundManager = soundManager;
-        this.eventBus = eventBus;
+        this.gameManager = gameManager;
     }
+
+    private void Awake()
+    {
+        AddBottle();
+    }
+
 
     private void Start()
     {
-        AddBottle();
-        eventBus().Subscribe<IntermediateSignal>(CheckBottles);
-        eventBus().Subscribe<EndBottlesSignal>(SetRandomBottles);
+        //eventBus().Subscribe<IntermediateSignal>(CheckBottles);
+        //eventBus().Subscribe<EndBottlesSignal>(SetRandomBottles);
 
-        eventBus().Subscribe<UnsubscibeSignal>(Dispose);
+        gameManager().StartGame += SetBottles;
+        InstantiateBottles += SetBottles;
     }
 
     public void Spawn(CommonBottle bottles)
@@ -44,43 +54,41 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
         }
     }
 
-    public void CheckBottles(IntermediateSignal signal)
+    public bool CheckBottles()
     {
         if (BottlesExist.Count == 0)
         {
-            eventBus().Invoke(new EndBottlesSignal(CountOfBottles));
+            InstantiateBottles?.Invoke();
+            return false;
         }
+        return true;
     }
 
     public void AddBottle()
     {
-        for (int i = 0; i < bottles.Length; i++)
-        {
-            for (int j = 0; j < bottles.Length; j++)
-            {
-                if (bottles[i].GetComponent<CommonBottle>().weight < bottles[j].GetComponent<CommonBottle>().weight)
-                {
-                    var bottle = bottles[j];
-                    bottles[j] = bottles[i];
-                    bottles[i] = bottle;
-                }
-            }
-        }
+        var bottlesSorted = bottles.OrderBy(p => p.GetComponent<CommonBottle>().weight).ToList();
 
-        foreach (var bottle in bottles)
+        foreach (var bottle in bottlesSorted)
         {
             Spawn(bottle.GetComponent<CommonBottle>());
         }
     }
 
-    public CommonBottle TakeRandom()
+    public CommonBottle TakeRandom() => BottlesExist[UnityEngine.Random.Range(0, BottlesExist.Count)];
+
+
+
+    public void SetBottles()
     {
-        return BottlesExist[UnityEngine.Random.Range(0, BottlesExist.Count)];
+        int count = CountOfBottles;
+        SetRandomBottles(count);
+
+        ShowBottles?.Invoke(CurrentBottles);
     }
 
-    public void SetRandomBottles(EndBottlesSignal signal)
+    private void SetRandomBottles(int count)
     {
-        for (int i = 0; i < signal.Count; i++)
+        for (int i = 0; i < count; i++)
         {
             float rand = UnityEngine.Random.Range(0, 1.0f);
             foreach (var bottles in bottlesPool)
@@ -94,7 +102,7 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
                 }
             }
         }
-        eventBus().Invoke(new HandleTextSignal(ShowCurrentBottles()));
+        CurrentBottles = ShowCurrentBottles();
     }
 
     public string ShowCurrentBottles()
@@ -124,7 +132,7 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
     { 
         if(playerChoise == enemyChoise)
         {
-            if (player.dndManipulator.GetCharacteristicValue("Charisma") + UnityEngine.Random.Range(0, (int)Dices.D20) >= enemy.manipulator.GetCharacteristicValue("Charisma") + UnityEngine.Random.Range(0, (int)Dices.D20))
+            if (player.Person.charisma.Value + UnityEngine.Random.Range(0, (int)Dices.D20) >= enemy.Person.charisma.Value + UnityEngine.Random.Range(0, (int)Dices.D20))
                 playerChoise.SetEffect(player);
             else enemyChoise.SetEffect(enemy);
 
@@ -143,11 +151,5 @@ public class BottlesManager : MonoBehaviour, IService, IDispose
         bottlesPool[bottle.weight].Release(bottle);
         soundManager().PlaySound(bottleUseSound, bottle.transform, 1f);
         BottlesExist.Remove(bottle);
-    }
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        eventBus().Unsubscribe<IntermediateSignal>(CheckBottles);
-        eventBus().Unsubscribe<EndBottlesSignal>(SetRandomBottles);
     }
 }

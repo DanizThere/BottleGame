@@ -3,10 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class DialogueManager : MonoBehaviour, IService, IDispose
+public class DialogueManager : MonoBehaviour, IService
 {
     private Dictionary<string, SimpleSentence> sentences = new Dictionary<string, SimpleSentence>();
-    private EventBus eventBus;
     private Player player;
     private TextWriting textWriting;
     private CancellationTokenSource token = new CancellationTokenSource();
@@ -15,12 +14,11 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
     
     public void Init(TextWriting txtWriting)
     {
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
         player = FindAnyObjectByType<Player>();
         textWriting = txtWriting;
 
-        eventBus.Subscribe<DialogueSignal>(StartDialogue, 1);
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
+        //eventBus.Subscribe<DialogueSignal>(StartDialogue, 1);
+        //eventBus.Subscribe<UnsubscibeSignal>(Dispose); заменить
 
         foreach (var sentence in sentencesPrefab)
         {
@@ -54,17 +52,17 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
         sentences.Remove(key);
     }
 
-    public async void StartDialogue(DialogueSignal signal)
+    public async void StartDialogue(string key)
     {
-        if (!sentences.ContainsKey(signal.Key)) 
+        if (!sentences.ContainsKey(key)) 
         {
 #if UNITY_EDITOR
-            Debug.LogError($"{signal.Key} не существует");
+            Debug.LogError($"{key} не существует");
 #endif
             return;
         }
 
-        await sentences[signal.Key].StartType(ResetToken().Token, eventBus, textWriting, player.transform);
+        await sentences[key].StartType(ResetToken().Token, textWriting, player.transform);
     }
 
     public void CancelString()
@@ -76,10 +74,5 @@ public class DialogueManager : MonoBehaviour, IService, IDispose
     {
         token = new CancellationTokenSource();
         return token;
-    }
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        eventBus.Unsubscribe<DialogueSignal>(StartDialogue);
     }
 }

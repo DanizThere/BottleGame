@@ -18,13 +18,13 @@ public class SaveManager : MonoBehaviour, IService
 
     public void Save()
     {
-        saveData.PersonName = player.dndManipulator.person.personName;
+        saveData.PersonName = player.Manipulator.person.personName;
         saveFile.Save(saveData);
     }
 
     public void Save(int recordScore)
     {
-        saveData.PersonName = player.dndManipulator.person.personName;
+        saveData.PersonName = player.Manipulator.person.personName;
         saveData.RecordScore = recordScore;
         saveFile.Save(saveData);
     }
@@ -38,7 +38,6 @@ public class SaveManager : MonoBehaviour, IService
     public void Load()
     {
         saveData = saveFile.Load(new SaveData());
-        player.dndManipulator.SetName(saveData.PersonName);
     }
 
     public int LoadPoints()

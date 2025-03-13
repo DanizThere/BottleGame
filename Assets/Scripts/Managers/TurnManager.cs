@@ -1,35 +1,28 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-public class TurnManager : IService, IDispose
+public class TurnManager : IService
 {
-    private EventBus eventBus;
-    private Stack<int> turns = new Stack<int>();
+    private Reactive<Turn> currentTurn = new Reactive<Turn>();
+    private IntermediateTurn checkTurn = new IntermediateTurn();
     public void Init()
     {
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
 
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
-        eventBus.Subscribe<DeathSignal>(AllTurns);
     }
 
-    public int ShowLastTurn()
+    public Guid ShowLastTurn()
     {
-        return turns.Peek();
+        return currentTurn.Value.Name;
     }
 
-    public void AddTurn(int turn)
+    public async void AddTurn(Turn turn)
     {
-        turns.Push(turn);
-    }
+        currentTurn.Value = checkTurn;
 
-    public void AllTurns(DeathSignal signal)
-    {
-        var a = turns.GroupBy(p => p).Where(p => p.Count() > 0).Select(p => p.Count()).ToArray();
-    }
+        await checkTurn.CheckBottles();
 
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        eventBus.Unsubscribe<DeathSignal>(AllTurns);
+        currentTurn.Value = turn;
     }
 }

@@ -1,13 +1,9 @@
 using System;
 using UnityEngine;
 
-public class UIManager : MonoBehaviour, IService, IDispose
+public class UIManager : MonoBehaviour, IService
 {
-    private Func<EventBus> eventBus;
-    private DeathMenu deathMenu;
-    private Func<DialogueManager> dialogueManager;
     private TextWriting textWriting;
-    public ListManager listManager { get; private set; }
     public CharacterList characterList;
     private Player player;
 
@@ -20,17 +16,15 @@ public class UIManager : MonoBehaviour, IService, IDispose
     private TMPro.TMP_Text anotherText;
     private PoolObject<TMPro.TMP_Text> prefabs;
     private Func<SaveManager> saveManager;
+    private Func<DialogueManager> dialogueManager;
 
-    public void Init(ListManager list, Func<EventBus> eventBus, Func<SaveManager> saveManager, Func<DialogueManager> dialogueManager)
+    public void Init(Func<SaveManager> saveManager, Func<DialogueManager> dialogueManager)
     {
         player = FindAnyObjectByType<Player>();
-        this.eventBus = eventBus;
         this.saveManager = saveManager;
         this.dialogueManager = dialogueManager;
-        listManager = list;
         textWriting = gameObject.AddComponent<TextWriting>();
         textWriting.Init(whoTell, output);
-        deathMenu = DeadMenu.GetComponent<DeathMenu>();
 
         if (DeadMenu != null) DeadMenu.SetActive(false);
         if (DialogueUI != null) DialogueUI.SetActive(false);
@@ -38,20 +32,18 @@ public class UIManager : MonoBehaviour, IService, IDispose
         anotherText = Resources.Load<TMPro.TMP_Text>(resourcePath);
         prefabs = new PoolObject<TMPro.TMP_Text>(anotherText, 10);
 
-        //if(characterList != null) characterList.Init(this.player.dndManipulator.person);
         this.dialogueManager().Init(textWriting);
+
     }
 
     private void Start()
     {
-        deathMenu.Init(player.dndManipulator.classes,() => saveManager());
+        ServiceLocator.Instance.Get<GameManager>().OnDeath += () => DeadMenu.SetActive(true);
+        ServiceLocator.Instance.Get<BottlesManager>().ShowBottles += ShowAnotherText;
 
-        eventBus().Subscribe<DeathSignal>(Death, 0);
-        eventBus().Subscribe<DeathSignal>(deathMenu.ShowInfo, 1);
-        eventBus().Subscribe<DialogueSignal>(DialogueStart);
-        eventBus().Subscribe<StopDialogueSignal>(DialogueEnd);
-        eventBus().Subscribe<HandleTextSignal>(x => { ShowAnotherText(x.Text); });
-        eventBus().Subscribe<UnsubscibeSignal>(Dispose);
+        //eventBus().Subscribe<DialogueSignal>(DialogueStart);
+        //eventBus().Subscribe<StopDialogueSignal>(DialogueEnd);
+        // заменить
     }
 
     public async void ShowAnotherText(string Text)
@@ -67,27 +59,13 @@ public class UIManager : MonoBehaviour, IService, IDispose
         prefabs.Release(txt);
     }
 
-    public void Death(DeathSignal signal)
-    {
-        DeadMenu.SetActive(true);
-    }
-
-    public void DialogueStart(DialogueSignal signal) 
+    public void DialogueStart() 
     {
         DialogueUI.SetActive(true);
     }
 
-    public void DialogueEnd(StopDialogueSignal signal)
+    public void DialogueEnd()
     {
         DialogueUI.SetActive(false);
-    }
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        eventBus().Unsubscribe<DeathSignal>(Death);
-        eventBus().Unsubscribe<DeathSignal>(deathMenu.ShowInfo);
-        eventBus().Unsubscribe<DialogueSignal>(DialogueStart);
-        eventBus().Unsubscribe<StopDialogueSignal>(DialogueEnd);
-        eventBus().Unsubscribe<HandleTextSignal>(x => ShowAnotherText(x.Text));
     }
 }

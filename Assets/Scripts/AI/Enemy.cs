@@ -3,32 +3,71 @@ using UnityEngine;
 public class Enemy : MonoBehaviour, IEntity
 {
     private bool isBelieved = false;
-    private EventBus eventBus;
-    [SerializeField] private DNDPerson person;
+    private DNDPerson person;
     [SerializeField] private DNDClasses classes;
-    public DNDManipulator manipulator { get; private set; }
+    private DNDManipulator manipulator;
     private Mob mob;
     private Backpack backpack;
+    private bool isAgreed = true;
+    private CommonBottle chosenBottle;
+    private BottlesManager bottlesManager;
+    private Turn yourTurn;
 
-    public CommonBottle enchanted { get; private set; }
-    public bool isAgreed = true;
+    public Turn YourTurn => yourTurn;
+    public float BottlePrice
+    {
+        get
+        {
+            float price = 0;
+            foreach (CommonBottle btls in bottlesManager.BottlesExist)
+            {
+                price += btls.weight;
+            }
+            return price;
+        }
+    }
+    public bool IsAgried => isAgreed;
+    public CommonBottle ChosenBottle
+    {
+        get => chosenBottle;
+        set => chosenBottle = value;
+    }
+    public DNDPerson Person => person;
+    public int Hits
+    {
+        get
+        {
+            return manipulator.person.hits;
+        }
+        set
+        {
+            manipulator.person.hits = value;
+        }
+    }
+
+    public DNDManipulator Manipulator => manipulator;
 
     private void Awake()
     {
+        person = new DNDPerson()
+            .SetTurnValue(person.turnValue)
+            .SetName("Nameless sorcerer")
+            .InitCharacteristics(8, 8, 8, 8, 8, 8);
+
+
         manipulator = new DNDManipulator()
             .SetPerson(person)
-            .InitCharacteristics(8, 8, 8, 8, 8, 8)
-            .SetName("Enemy")
             .SetClasses(classes)
-            .SetsStartHits(person.characteristics["Dexterity"][1])
-            .SetTurnValue((int)TypeOfPerson.ENEMY);
+            .SetsStartHits(person.dexterity.Value);
+
+        yourTurn = new Turn();
+        Debug.Log(yourTurn.Name);
     }
 
     private void Start()
     {
+        bottlesManager = ServiceLocator.Instance.Get<BottlesManager>();
         isBelieved = false;
-
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
     }
 
     public bool IsBelieved()
@@ -36,14 +75,9 @@ public class Enemy : MonoBehaviour, IEntity
         return isBelieved;
     }
 
-    public void SetEnchanted(CommonBottle enchanted) => this.enchanted = enchanted;
+    public void SetEnchanted(CommonBottle enchanted) => ChosenBottle = enchanted;
 
-    public CommonBottle Bottle()
-    {
-        return enchanted;
-    }
-
-    public void SetEnchantedBottle(CommonBottle enchantedBottle) => enchanted = enchantedBottle;
+    public void SetEnchantedBottle(CommonBottle enchantedBottle) => ChosenBottle = enchantedBottle;
     public void SetMob(Mob mob) => this.mob = mob;
     public void SetBackpack(Backpack backpack) => this.backpack = backpack;
 

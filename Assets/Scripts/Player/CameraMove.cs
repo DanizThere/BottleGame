@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CameraMove : MonoBehaviour, IMoveable, IDispose
+public class CameraMove : MonoBehaviour, IMoveable
 {
     private InputManager inputManager;
-    private EventBus eventBus;
     private Player player;
     public float minRotY = -45f, maxRotY = 45f;
     public float minRotX = -90f, maxRotX = 90f;
@@ -14,20 +13,27 @@ public class CameraMove : MonoBehaviour, IMoveable, IDispose
     private Camera cam;
 
     private float rotX, rotY;
+
+    private GameManager gameManager;
     private void Start()
     {
         cam = Camera.main;
         inputManager = FindAnyObjectByType<InputManager>();
-
+        gameManager = ServiceLocator.Instance.Get<GameManager>();
         player = FindAnyObjectByType<Player>();
 
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
-        eventBus.Subscribe<OnUISignal>(OnUI);
-        eventBus.Subscribe<OffUISignal>(OffUI);
-        eventBus.Subscribe<StopPlaySignal>(SetMoveFalse);
-        eventBus.Subscribe<StopPlaySignal>(SetOriginalCamera);
-        eventBus.Subscribe<StartPlaySignal>(SetMoveTrue);
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
+        //eventBus.Subscribe<OnUISignal>(OnUI);
+        //eventBus.Subscribe<StartPlaySignal>(SetMoveTrue);
+        //заменить
+
+        //gameManager.StartGame += OffUI;
+        gameManager.StartGame += () => canMove = true;
+        gameManager.OnSelected += () => canMove = false;
+        gameManager.OnSelected += SetOriginalCamera;
+        gameManager.OnDeath += () => canMove = false;
+        gameManager.OnDeath += SetOriginalCamera;
+        gameManager.OnDeath += OnUI;
+
     }
 
     private void LateUpdate()
@@ -66,37 +72,22 @@ public class CameraMove : MonoBehaviour, IMoveable, IDispose
         return cam.ScreenToViewportPoint(mousePos);
     }
 
-    private void SetOriginalCamera(StopPlaySignal signal)
+    private void SetOriginalCamera()
     {
         rotX = 0;
         rotY = 0;
         transform.rotation = Quaternion.identity;
     }
 
-    public void SetMoveTrue(StartPlaySignal signal)
-    {
-        canMove = true;
-    }
-
-    public void SetMoveFalse(StopPlaySignal signal)
-    {
-        canMove = false;
-    }
-
-    public void OnUI(OnUISignal signal)
+    public void OnUI()
     {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
 
-    public void OffUI(OffUISignal signal)
+    public void OffUI()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-    }
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        eventBus.Unsubscribe<StopPlaySignal>(SetMoveFalse);
     }
 }

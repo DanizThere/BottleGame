@@ -3,12 +3,14 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HUD : MonoBehaviour, IDispose
+public class HUD : MonoBehaviour
 {
+
     [SerializeField] private GameObject Hud;
     [SerializeField] private GameObject Heal;
     [SerializeField] private GameObject Damage;
-    private EventBus eventBus;
+
+    private GameManager gameManager;
 
     private void Awake()
     {
@@ -17,30 +19,18 @@ public class HUD : MonoBehaviour, IDispose
 
     private void Start()
     {
-        eventBus = ServiceLocator.Instance.Get<EventBus>();
-
-        eventBus.Subscribe<HealSignal>(HealAction);
-        eventBus.Subscribe<DamageSignal>(DamageAction);
-        eventBus.Subscribe<UnsubscibeSignal>(Dispose);
     }
 
-    public async void HealAction(HealSignal signal)
+    public async void HealAction()
     {
         Heal.SetActive(true);
         await Awaitable.WaitForSecondsAsync(.5f);
         Heal.SetActive(false);
     }
-    public async void DamageAction(DamageSignal signal)
+    public async void DamageAction()
     {
         Damage.SetActive(true);
         await Awaitable.WaitForSecondsAsync(.5f);
         Damage.SetActive(false);
-    }
-
-
-    public void Dispose(UnsubscibeSignal signal)
-    {
-        eventBus.Unsubscribe<HealSignal>(HealAction);
-        eventBus.Unsubscribe<DamageSignal>(DamageAction);
     }
 }

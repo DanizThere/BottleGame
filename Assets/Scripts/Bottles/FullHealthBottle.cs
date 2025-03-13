@@ -16,13 +16,12 @@ public class FullHealthBottle : CommonBottle
     public override void SetEffect(Player player)
     {
         base.TakeEffect(player);
-        StandardEffect(player.dndManipulator);
-        eventBus.Invoke(new HealSignal());
+        StandardEffect(player.Manipulator);
     }
 
     public override void SetEffect(Enemy enemy)
     {
         base.TakeEffect(enemy);
-        StandardEffect(enemy.manipulator);
+        StandardEffect(enemy.Manipulator);
     }
 }
